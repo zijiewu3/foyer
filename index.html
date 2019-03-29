@@ -24,7 +24,7 @@
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -167,25 +167,25 @@
 <p>Annotate an <a class="reference external" href="http://docs.openmm.org/7.0.0/userguide/application.html#creating-force-fields">OpenMM .xml force
 field</a>
 file with SMARTS-based atomtypes:</p>
-<div class="code xml highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">ForceField</span><span class="o">&gt;</span>
- <span class="o">&lt;</span><span class="n">AtomTypes</span><span class="o">&gt;</span>
-  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_135&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;CT&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;C&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;12.01100&quot;</span> <span class="n">def</span><span class="o">=</span><span class="s2">&quot;[C;X4](C)(H)(H)H&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;alkane CH3&quot;</span><span class="o">/&gt;</span>
-  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_140&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;HC&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;H&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;1.00800&quot;</span>  <span class="n">def</span><span class="o">=</span><span class="s2">&quot;H[C;X4]&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;alkane H&quot;</span><span class="o">/&gt;</span>
- <span class="o">&lt;/</span><span class="n">AtomTypes</span><span class="o">&gt;</span>
-<span class="o">&lt;/</span><span class="n">ForceField</span><span class="o">&gt;</span>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;ForceField&gt;</span>
+ <span class="nt">&lt;AtomTypes&gt;</span>
+  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_135&quot;</span> <span class="na">class=</span><span class="s">&quot;CT&quot;</span> <span class="na">element=</span><span class="s">&quot;C&quot;</span> <span class="na">mass=</span><span class="s">&quot;12.01100&quot;</span> <span class="na">def=</span><span class="s">&quot;[C;X4](C)(H)(H)H&quot;</span> <span class="na">desc=</span><span class="s">&quot;alkane CH3&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_140&quot;</span> <span class="na">class=</span><span class="s">&quot;HC&quot;</span> <span class="na">element=</span><span class="s">&quot;H&quot;</span> <span class="na">mass=</span><span class="s">&quot;1.00800&quot;</span>  <span class="na">def=</span><span class="s">&quot;H[C;X4]&quot;</span> <span class="na">desc=</span><span class="s">&quot;alkane H&quot;</span><span class="nt">/&gt;</span>
+ <span class="nt">&lt;/AtomTypes&gt;</span>
+<span class="nt">&lt;/ForceField&gt;</span>
 </pre></div>
 </div>
 <p>Apply the forcefield to arbitrary chemical topologies. We currently
 support:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://docs.openmm.org/7.0.0/api-python/generated/simtk.openmm.app.topology.Topology.html#">OpenMM.Topology</a></li>
-<li><a class="reference external" href="http://parmed.github.io/ParmEd/html/structure.html">ParmEd.Structure</a></li>
-<li><a class="reference external" href="http://mosdef-hub.github.io/mbuild/data_structures.html">mBuild.Compound</a></li>
+<li><p><a class="reference external" href="http://docs.openmm.org/7.0.0/api-python/generated/simtk.openmm.app.topology.Topology.html#">OpenMM.Topology</a></p></li>
+<li><p><a class="reference external" href="http://parmed.github.io/ParmEd/html/structure.html">ParmEd.Structure</a></p></li>
+<li><p><a class="reference external" href="http://mosdef-hub.github.io/mbuild/data_structures.html">mBuild.Compound</a></p></li>
 </ul>
-<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">foyer</span> <span class="k">import</span> <span class="n">Forcefield</span>
-<span class="kn">import</span> <span class="nn">parmed</span> <span class="k">as</span> <span class="nn">pmd</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">foyer</span> <span class="kn">import</span> <span class="n">Forcefield</span>
+<span class="kn">import</span> <span class="nn">parmed</span> <span class="kn">as</span> <span class="nn">pmd</span>
 
-<span class="n">untyped_ethane</span> <span class="o">=</span> <span class="n">pmd</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;ethane.mol2&#39;</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">untyped_ethane</span> <span class="o">=</span> <span class="n">pmd</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;ethane.mol2&#39;</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="n">oplsaa</span> <span class="o">=</span> <span class="n">Forcefield</span><span class="p">(</span><span class="n">forcefield_files</span><span class="o">=</span><span class="s1">&#39;oplsaa.xml&#39;</span><span class="p">)</span>
 <span class="n">ethane</span> <span class="o">=</span> <span class="n">oplsaa</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">untyped_ethane</span><span class="p">)</span>
 
