@@ -1,0 +1,1000 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>foyer.forcefield &mdash; foyer 0.6.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../',
+              VERSION:'0.6.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> foyer
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../smarts.html">SMARTS-based atomtyping</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../forcefields.html">Parameter definitions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../atom-typing_options.html">Atom-typing Options</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../usage_examples.html">Usage Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../paper_examples.html">Paper Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../validation.html">Validation of force field files</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">foyer</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>foyer.forcefield</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for foyer.forcefield</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">mktemp</span><span class="p">,</span> <span class="n">mkstemp</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="k">import</span> <span class="n">resource_filename</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">parmed</span> <span class="k">as</span> <span class="nn">pmd</span>
+<span class="kn">import</span> <span class="nn">simtk.openmm.app.element</span> <span class="k">as</span> <span class="nn">elem</span>
+<span class="kn">import</span> <span class="nn">foyer.element</span> <span class="k">as</span> <span class="nn">custom_elem</span>
+<span class="kn">import</span> <span class="nn">simtk.unit</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">from</span> <span class="nn">simtk</span> <span class="k">import</span> <span class="n">openmm</span> <span class="k">as</span> <span class="n">mm</span>
+<span class="kn">from</span> <span class="nn">simtk.openmm</span> <span class="k">import</span> <span class="n">app</span>
+<span class="kn">from</span> <span class="nn">simtk.openmm.app.forcefield</span> <span class="k">import</span> <span class="p">(</span><span class="n">NoCutoff</span><span class="p">,</span> <span class="n">CutoffNonPeriodic</span><span class="p">,</span> <span class="n">HBonds</span><span class="p">,</span>
+                                         <span class="n">AllBonds</span><span class="p">,</span> <span class="n">HAngles</span><span class="p">,</span> <span class="n">NonbondedGenerator</span><span class="p">,</span>
+                                         <span class="n">_convertParameterToNumber</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">foyer.atomtyper</span> <span class="k">import</span> <span class="n">find_atomtypes</span>
+<span class="kn">from</span> <span class="nn">foyer.exceptions</span> <span class="k">import</span> <span class="n">FoyerError</span>
+<span class="kn">from</span> <span class="nn">foyer</span> <span class="k">import</span> <span class="n">smarts</span>
+<span class="kn">from</span> <span class="nn">foyer.validator</span> <span class="k">import</span> <span class="n">Validator</span>
+<span class="kn">from</span> <span class="nn">foyer.utils.io</span> <span class="k">import</span> <span class="n">import_</span><span class="p">,</span> <span class="n">has_mbuild</span>
+
+<span class="k">def</span> <span class="nf">preprocess_forcefield_files</span><span class="p">(</span><span class="n">forcefield_files</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">forcefield_files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">preprocessed_files</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">xml_file</span> <span class="ow">in</span> <span class="n">forcefield_files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xml_file</span><span class="p">,</span><span class="s1">&#39;read&#39;</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">xml_file</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span><span class="n">suffix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">xml_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">xml_file</span>
+            <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># read and preprocess</span>
+        <span class="n">xml_contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">xml_contents</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(def\w*=\w*[</span><span class="se">\&quot;</span><span class="s2">\&#39;])(.*)([</span><span class="se">\&quot;</span><span class="s2">\&#39;])&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&amp;(?!amp;)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;&amp;amp;&quot;</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                              <span class="n">xml_contents</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Sort topology objects by precedence, defined by the number of</span>
+<span class="sd">            `type` attributes specified, where a `type` attribute indicates</span>
+<span class="sd">            increased specificity as opposed to use of `class`</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">xml_contents</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">root</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;Force&#39;</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">tag</span><span class="p">:</span>
+                    <span class="n">element</span><span class="p">[:]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">child</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nb">len</span><span class="p">([</span><span class="n">attr_name</span> <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                                    <span class="k">if</span> <span class="s1">&#39;type&#39;</span> <span class="ow">in</span> <span class="n">attr_name</span><span class="p">])))</span>
+            <span class="n">xml_contents</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">ET</span><span class="o">.</span><span class="n">ParseError</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Provide the user with a warning if sorting could not be performed.</span>
+<span class="sd">            This indicates a bad XML file, which will be passed on to the</span>
+<span class="sd">            Validator to yield a more descriptive error message.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Invalid XML detected. Could not auto-sort topology &#39;</span>
+                          <span class="s1">&#39;objects by precedence.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># write to temp file</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">temp_file_name</span> <span class="o">=</span> <span class="n">mkstemp</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_f</span><span class="p">:</span>
+            <span class="n">temp_f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">xml_contents</span><span class="p">)</span>
+
+        <span class="c1"># append temp file name to list</span>
+        <span class="n">preprocessed_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">preprocessed_files</span>
+
+
+<span class="k">def</span> <span class="nf">generate_topology</span><span class="p">(</span><span class="n">non_omm_topology</span><span class="p">,</span> <span class="n">non_element_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">residues</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create an OpenMM Topology from another supported topology structure.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">non_element_types</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">non_element_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">non_omm_topology</span><span class="p">,</span> <span class="n">pmd</span><span class="o">.</span><span class="n">Structure</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_topology_from_parmed</span><span class="p">(</span><span class="n">non_omm_topology</span><span class="p">,</span> <span class="n">non_element_types</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">has_mbuild</span><span class="p">:</span>
+        <span class="n">mb</span> <span class="o">=</span> <span class="n">import_</span><span class="p">(</span><span class="s1">&#39;mbuild&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">non_omm_topology</span><span class="p">,</span> <span class="n">mb</span><span class="o">.</span><span class="n">Compound</span><span class="p">):</span>
+            <span class="n">pmdCompoundStructure</span> <span class="o">=</span> <span class="n">non_omm_topology</span><span class="o">.</span><span class="n">to_parmed</span><span class="p">(</span><span class="n">residues</span><span class="o">=</span><span class="n">residues</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_topology_from_parmed</span><span class="p">(</span><span class="n">pmdCompoundStructure</span><span class="p">,</span> <span class="n">non_element_types</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FoyerError</span><span class="p">(</span><span class="s1">&#39;Unknown topology format: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                         <span class="s1">&#39;Supported formats are: &#39;</span>
+                         <span class="s1">&#39;&quot;parmed.Structure&quot;, &#39;</span>
+                         <span class="s1">&#39;&quot;mbuild.Compound&quot;, &#39;</span>
+                         <span class="s1">&#39;&quot;openmm.app.Topology&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">non_omm_topology</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_topology_from_parmed</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">non_element_types</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a ParmEd Structure to an OpenMM Topology.&quot;&quot;&quot;</span>
+    <span class="n">topology</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">Topology</span><span class="p">()</span>
+    <span class="n">residues</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">pmd_residue</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+        <span class="n">chain</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">addChain</span><span class="p">()</span>
+        <span class="n">omm_residue</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">addResidue</span><span class="p">(</span><span class="n">pmd_residue</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">chain</span><span class="p">)</span>
+        <span class="n">residues</span><span class="p">[</span><span class="n">pmd_residue</span><span class="p">]</span> <span class="o">=</span> <span class="n">omm_residue</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># pmd.Atom: omm.Atom</span>
+
+    <span class="k">for</span> <span class="n">pmd_atom</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">pmd_atom</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">pmd_atom</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">non_element_types</span><span class="p">:</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">non_element_types</span><span class="p">[</span><span class="n">pmd_atom</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">pmd_atom</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span>
+                    <span class="n">pmd_atom</span><span class="o">.</span><span class="n">atomic_number</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">element</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Element</span><span class="o">.</span><span class="n">getByAtomicNumber</span><span class="p">(</span><span class="n">pmd_atom</span><span class="o">.</span><span class="n">atomic_number</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">element</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">Element</span><span class="o">.</span><span class="n">getBySymbol</span><span class="p">(</span><span class="n">pmd_atom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">omm_atom</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">addAtom</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">residues</span><span class="p">[</span><span class="n">pmd_atom</span><span class="o">.</span><span class="n">residue</span><span class="p">])</span>
+        <span class="n">atoms</span><span class="p">[</span><span class="n">pmd_atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">omm_atom</span>
+        <span class="n">omm_atom</span><span class="o">.</span><span class="n">bond_partners</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
+        <span class="n">atom1</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">]</span>
+        <span class="n">atom2</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">]</span>
+        <span class="n">topology</span><span class="o">.</span><span class="n">addBond</span><span class="p">(</span><span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">)</span>
+        <span class="n">atom1</span><span class="o">.</span><span class="n">bond_partners</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom2</span><span class="p">)</span>
+        <span class="n">atom2</span><span class="o">.</span><span class="n">bond_partners</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">structure</span><span class="o">.</span><span class="n">box_vectors</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">_value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">box_vectors</span><span class="p">]):</span>
+        <span class="n">topology</span><span class="o">.</span><span class="n">setPeriodicBoxVectors</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">box_vectors</span><span class="p">)</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">positions</span>
+    <span class="k">return</span> <span class="n">topology</span><span class="p">,</span> <span class="n">positions</span>
+
+
+<span class="k">def</span> <span class="nf">_topology_from_residue</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a openmm.app.Topology.Residue to openmm.app.Topology.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    res : openmm.app.Topology.Residue</span>
+<span class="sd">        An individual residue in an openmm.app.Topology</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    topology : openmm.app.Topology</span>
+<span class="sd">        The generated topology</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">topology</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">Topology</span><span class="p">()</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">addChain</span><span class="p">()</span>
+    <span class="n">new_res</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">addResidue</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">chain</span><span class="p">)</span>
+
+    <span class="n">atoms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># { omm.Atom in res : omm.Atom in *new* topology }</span>
+
+    <span class="k">for</span> <span class="n">res_atom</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">atoms</span><span class="p">():</span>
+        <span class="n">topology_atom</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">addAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">res_atom</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                         <span class="n">element</span><span class="o">=</span><span class="n">res_atom</span><span class="o">.</span><span class="n">element</span><span class="p">,</span>
+                         <span class="n">residue</span><span class="o">=</span><span class="n">new_res</span><span class="p">)</span>
+        <span class="n">atoms</span><span class="p">[</span><span class="n">res_atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">topology_atom</span>
+        <span class="n">topology_atom</span><span class="o">.</span><span class="n">bond_partners</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
+        <span class="n">atom1</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">]</span>
+        <span class="n">atom2</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">]</span>
+        <span class="n">topology</span><span class="o">.</span><span class="n">addBond</span><span class="p">(</span><span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">)</span>
+        <span class="n">atom1</span><span class="o">.</span><span class="n">bond_partners</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom2</span><span class="p">)</span>
+        <span class="n">atom2</span><span class="o">.</span><span class="n">bond_partners</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atom1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">topology</span>
+
+
+<span class="k">def</span> <span class="nf">_check_independent_residues</span><span class="p">(</span><span class="n">topology</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check to see if residues will constitute independent graphs.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">residues</span><span class="p">():</span>
+        <span class="n">atoms_in_residue</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">atoms</span><span class="p">()])</span>
+        <span class="n">bond_partners_in_residue</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">bond_partners</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">atoms</span><span class="p">()]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
+        <span class="c1"># Handle the case of a &#39;residue&#39; with no neighbors</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bond_partners_in_residue</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">atoms_in_residue</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">bond_partners_in_residue</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span> <span class="nf">_update_atomtypes</span><span class="p">(</span><span class="n">unatomtyped_topology</span><span class="p">,</span> <span class="n">res_name</span><span class="p">,</span> <span class="n">prototype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Update atomtypes in residues in a topology using a prototype topology.</span>
+
+<span class="sd">    Atomtypes are updated when residues in each topology have matching names.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    unatomtyped_topology : openmm.app.Topology</span>
+<span class="sd">        Topology lacking atomtypes defined by `find_atomtypes`.</span>
+<span class="sd">    prototype : openmm.app.Topology</span>
+<span class="sd">        Prototype topology with atomtypes defined by `find_atomtypes`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">unatomtyped_topology</span><span class="o">.</span><span class="n">residues</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">res_name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">old_atom</span><span class="p">,</span> <span class="n">new_atom_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">atoms</span><span class="p">()],</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">prototype</span><span class="o">.</span><span class="n">atoms</span><span class="p">()]):</span>
+                <span class="n">old_atom</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">new_atom_id</span>
+
+<span class="k">def</span> <span class="nf">_error_or_warn</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raise an error or warning if topology objects are not fully parameterized.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    error : bool</span>
+<span class="sd">        If True, raise an error, else raise a warning</span>
+<span class="sd">    msg : str</span>
+<span class="sd">        The message to be provided with the error or warning</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Forcefield"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield">[docs]</a><span class="k">class</span> <span class="nc">Forcefield</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">ForceField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Specialization of OpenMM&#39;s Forcefield allowing SMARTS based atomtyping.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    forcefield_files : list of str, optional, default=None</span>
+<span class="sd">        List of forcefield files to load.</span>
+<span class="sd">    name : str, optional, default=None</span>
+<span class="sd">        Name of a forcefield to load that is packaged within foyer.</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forcefield_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeDefinitions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeOverrides</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeDesc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeRefs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_included_forcefields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="n">all_files_to_load</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">forcefield_files</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">forcefield_files</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">forcefield_files</span><span class="p">:</span>
+                    <span class="n">all_files_to_load</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_files_to_load</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">forcefield_files</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">included_forcefields</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Forcefield </span><span class="si">{}</span><span class="s1"> cannot be found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_files_to_load</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="n">preprocessed_files</span> <span class="o">=</span> <span class="n">preprocess_forcefield_files</span><span class="p">(</span><span class="n">all_files_to_load</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">validation</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ff_file_name</span> <span class="ow">in</span> <span class="n">preprocessed_files</span><span class="p">:</span>
+                <span class="n">Validator</span><span class="p">(</span><span class="n">ff_file_name</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Forcefield</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">preprocessed_files</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">smarts</span><span class="o">.</span><span class="n">SMARTS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">included_forcefields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_included_forcefields</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_included_forcefields</span>
+
+        <span class="n">ff_dir</span> <span class="o">=</span> <span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;foyer&#39;</span><span class="p">,</span> <span class="s1">&#39;forcefields&#39;</span><span class="p">)</span>
+        <span class="n">ff_filepaths</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ff_dir</span><span class="p">,</span> <span class="s1">&#39;*.xml&#39;</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">ff_filepath</span> <span class="ow">in</span> <span class="n">ff_filepaths</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">ff_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">ff_filepath</span><span class="p">)</span>
+            <span class="n">basename</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">ff_file</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_included_forcefields</span><span class="p">[</span><span class="n">basename</span><span class="p">]</span> <span class="o">=</span> <span class="n">ff_filepath</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_included_forcefields</span>
+
+    <span class="k">def</span> <span class="nf">_create_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">Element</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">element</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get_by_symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c1"># Enables support for non-atomistic &quot;element types&quot;</span>
+                <span class="k">if</span> <span class="n">element</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Non-atomistic element type detected. &#39;</span>
+                                  <span class="s1">&#39;Creating custom element for </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">element</span><span class="p">))</span>
+                <span class="n">element</span> <span class="o">=</span> <span class="n">custom_elem</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                       <span class="n">mass</span><span class="o">=</span><span class="n">mass</span><span class="p">,</span>
+                                       <span class="n">name</span><span class="o">=</span><span class="n">element</span><span class="p">,</span>
+                                       <span class="n">symbol</span><span class="o">=</span><span class="n">element</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">element</span><span class="p">,</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">element</span><span class="p">,</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="Forcefield.registerAtomType"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield.registerAtomType">[docs]</a>    <span class="k">def</span> <span class="nf">registerAtomType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Register a new atom type. &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomTypes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Found multiple definitions for atom type: &#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">atom_class</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span>
+        <span class="n">mass</span> <span class="o">=</span> <span class="n">_convertParameterToNumber</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;mass&#39;</span><span class="p">])</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;element&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="n">element</span><span class="p">,</span> <span class="n">custom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_element</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;element&#39;</span><span class="p">],</span> <span class="n">mass</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">custom</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atomTypes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_AtomType</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">atom_class</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">atom_class</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomClasses</span><span class="p">:</span>
+            <span class="n">type_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomClasses</span><span class="p">[</span><span class="n">atom_class</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">type_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_atomClasses</span><span class="p">[</span><span class="n">atom_class</span><span class="p">]</span> <span class="o">=</span> <span class="n">type_set</span>
+        <span class="n">type_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atomClasses</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;def&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;def&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;overrides&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="n">overrides</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">atype</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">atype</span>
+                            <span class="ow">in</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;overrides&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">overrides</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeOverrides</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">overrides</span>
+        <span class="k">if</span> <span class="s1">&#39;des&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeDesc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;desc&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;doi&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="n">dois</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">doi</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">doi</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;doi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeRefs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dois</span></div>
+
+<div class="viewcode-block" id="Forcefield.apply"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology</span><span class="p">,</span> <span class="n">references_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_residue_map</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">assert_bond_params</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assert_angle_params</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">assert_dihedral_params</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">assert_improper_params</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apply the force field to a molecular structure</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        topology : openmm.app.Topology or parmed.Structure or mbuild.Compound</span>
+<span class="sd">            Molecular structure to apply the force field to</span>
+<span class="sd">        references_file : str, optional, default=None</span>
+<span class="sd">            Name of file where force field references will be written (in Bibtex</span>
+<span class="sd">            format)</span>
+<span class="sd">        use_residue_map : boolean, optional, default=True</span>
+<span class="sd">            Store atomtyped topologies of residues to a dictionary that maps</span>
+<span class="sd">            them to residue names.  Each topology, including atomtypes, will be</span>
+<span class="sd">            copied to other residues with the same name. This avoids repeatedly</span>
+<span class="sd">            calling the subgraph isomorphism on idential residues and should</span>
+<span class="sd">            result in better performance for systems with many identical</span>
+<span class="sd">            residues, i.e. a box of water. Note that for this to be applied to</span>
+<span class="sd">            independent molecules, they must each be saved as different</span>
+<span class="sd">            residues in the topology.</span>
+<span class="sd">        assert_bond_params : bool, optional, default=True</span>
+<span class="sd">            If True, Foyer will exit if parameters are not found for all system</span>
+<span class="sd">            bonds.</span>
+<span class="sd">        assert_angle_params : bool, optional, default=True</span>
+<span class="sd">            If True, Foyer will exit if parameters are not found for all system</span>
+<span class="sd">            angles.</span>
+<span class="sd">        assert_dihedral_params : bool, optional, default=True</span>
+<span class="sd">            If True, Foyer will exit if parameters are not found for all system</span>
+<span class="sd">            proper dihedrals.</span>
+<span class="sd">        assert_improper_params : bool, optional, default=False</span>
+<span class="sd">            If True, Foyer will exit if parameters are not found for all system</span>
+<span class="sd">            improper dihedrals.</span>
+<span class="sd">        verbose : bool, optional, default=False</span>
+<span class="sd">            If True, Foyer will print debug-level information about notable or</span>
+<span class="sd">            potentially problematic details it encounters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeDefinitions</span> <span class="o">==</span> <span class="p">{}:</span>
+            <span class="k">raise</span> <span class="n">FoyerError</span><span class="p">(</span><span class="s1">&#39;Attempting to atom-type using a force field &#39;</span>
+                    <span class="s1">&#39;with no atom type defitions.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">Topology</span><span class="p">):</span>
+            <span class="n">residues</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;residues&#39;</span><span class="p">)</span>
+            <span class="n">topology</span><span class="p">,</span> <span class="n">positions</span> <span class="o">=</span> <span class="n">generate_topology</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span><span class="p">,</span> <span class="n">residues</span><span class="o">=</span><span class="n">residues</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">getNumAtoms</span><span class="p">(),</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">positions</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">box_vectors</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">getPeriodicBoxVectors</span><span class="p">()</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_atomtyping</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">use_residue_map</span><span class="o">=</span><span class="n">use_residue_map</span><span class="p">)</span>
+        <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSystem</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">pmd</span><span class="o">.</span><span class="n">openmm</span><span class="o">.</span><span class="n">load_topology</span><span class="p">(</span><span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">)</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Check that all topology objects (angles, dihedrals, and impropers)</span>
+<span class="sd">        have parameters assigned. OpenMM will generate an error if bond parameters</span>
+<span class="sd">        are not assigned.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">omm_ids</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
+                <span class="n">missing_angle</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">pmd_angle</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
+                    <span class="n">pmd_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom2</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom3</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">pmd_ids</span> <span class="o">==</span> <span class="n">omm_ids</span><span class="p">:</span>
+                        <span class="n">missing_angle</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">missing_angle</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Missing angle with ids </span><span class="si">{}</span><span class="s2"> and types </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                          <span class="n">omm_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">omm_ids</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">bonds</span>
+                       <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+                <span class="n">nmissing</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all bonds. &quot;</span>
+                       <span class="s2">&quot;Total system bonds: </span><span class="si">{}</span><span class="s2">, Parametrized bonds: </span><span class="si">{}</span><span class="s2">&quot;</span>
+                       <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="p">),</span> <span class="n">nmissing</span><span class="p">))</span>
+                <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_bond_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">)):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all angles. Total &quot;</span>
+                   <span class="s2">&quot;system angles: </span><span class="si">{}</span><span class="s2">, Parameterized angles: </span><span class="si">{}</span><span class="s2">&quot;</span>
+                   <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">)))</span>
+            <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_angle_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">proper_dihedrals</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">dihedrals</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">omm_ids</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">:</span>
+                <span class="n">missing_dihedral</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">pmd_proper</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">:</span>
+                    <span class="n">pmd_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom2</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom3</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom4</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">pmd_ids</span> <span class="o">==</span> <span class="n">omm_ids</span><span class="p">:</span>
+                        <span class="n">missing_dihedral</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">missing_dihedral</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;missing improper with ids </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pmd_ids</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">propers</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">)</span> <span class="o">!=</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="n">proper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all proper dihedrals. &quot;</span>
+                   <span class="s2">&quot;Total system dihedrals: </span><span class="si">{}</span><span class="s2">, Parameterized dihedrals: </span><span class="si">{}</span><span class="s2">. &quot;</span>
+                   <span class="s2">&quot;Note that if your system contains torsions of Ryckaert-&quot;</span>
+                   <span class="s2">&quot;Bellemans functional form, all of these torsions are &quot;</span>
+                   <span class="s2">&quot;processed as propers.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">),</span>
+                   <span class="nb">len</span><span class="p">(</span><span class="n">proper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">)))</span>
+            <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_dihedral_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">improper_dihedrals</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">dihedrals</span>
+                              <span class="k">if</span> <span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">impropers</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">impropers</span><span class="p">)</span> <span class="o">!=</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="n">improper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">impropers</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all impropers. Total &quot;</span>
+                   <span class="s2">&quot;system impropers: </span><span class="si">{}</span><span class="s2">, Parameterized impropers: </span><span class="si">{}</span><span class="s2">. &quot;</span>
+                   <span class="s2">&quot;Note that if your system contains torsions of Ryckaert-&quot;</span>
+                   <span class="s2">&quot;Bellemans functional form, all of these torsions are &quot;</span>
+                   <span class="s2">&quot;processed as propers&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">impropers</span><span class="p">),</span>
+                   <span class="nb">len</span><span class="p">(</span><span class="n">improper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">impropers</span><span class="p">)))</span>
+            <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_improper_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">structure</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span>
+        <span class="k">if</span> <span class="n">box_vectors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">box_vectors</span> <span class="o">=</span> <span class="n">box_vectors</span>
+        <span class="k">if</span> <span class="n">references_file</span><span class="p">:</span>
+            <span class="n">atom_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_references_to_file</span><span class="p">(</span><span class="n">atom_types</span><span class="p">,</span> <span class="n">references_file</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">structure</span></div>
+
+<div class="viewcode-block" id="Forcefield.run_atomtyping"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield.run_atomtyping">[docs]</a>    <span class="k">def</span> <span class="nf">run_atomtyping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology</span><span class="p">,</span> <span class="n">use_residue_map</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Atomtype the topology</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        topology : openmm.app.Topology</span>
+<span class="sd">            Molecular structure to find atom types of</span>
+<span class="sd">        use_residue_map : boolean, optional, default=True</span>
+<span class="sd">            Store atomtyped topologies of residues to a dictionary that maps</span>
+<span class="sd">            them to residue names.  Each topology, including atomtypes, will be</span>
+<span class="sd">            copied to other residues with the same name. This avoids repeatedly</span>
+<span class="sd">            calling the subgraph isomorphism on idential residues and should</span>
+<span class="sd">            result in better performance for systems with many identical</span>
+<span class="sd">            residues, i.e. a box of water. Note that for this to be applied to</span>
+<span class="sd">            independent molecules, they must each be saved as different</span>
+<span class="sd">            residues in the topology.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">use_residue_map</span><span class="p">:</span>
+            <span class="n">independent_residues</span> <span class="o">=</span> <span class="n">_check_independent_residues</span><span class="p">(</span><span class="n">topology</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">independent_residues</span><span class="p">:</span>
+                <span class="n">residue_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+                <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">residues</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">residue_map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">residue</span> <span class="o">=</span> <span class="n">_topology_from_residue</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+                        <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">residue</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                        <span class="n">residue_map</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">residue</span>
+
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">residue_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">_update_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">atoms</span><span class="p">()][</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not all atoms in topology have atom types&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">topology</span></div>
+
+<div class="viewcode-block" id="Forcefield.createSystem"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield.createSystem">[docs]</a>    <span class="k">def</span> <span class="nf">createSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology</span><span class="p">,</span> <span class="n">nonbondedMethod</span><span class="o">=</span><span class="n">NoCutoff</span><span class="p">,</span>
+                     <span class="n">nonbondedCutoff</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">nanometer</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">rigidWater</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">removeCMMotion</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hydrogenMass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct an OpenMM System representing a Topology with this force field.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        topology : Topology</span>
+<span class="sd">            The Topology for which to create a System</span>
+<span class="sd">        nonbondedMethod : object=NoCutoff</span>
+<span class="sd">            The method to use for nonbonded interactions.  Allowed values are</span>
+<span class="sd">            NoCutoff, CutoffNonPeriodic, CutoffPeriodic, Ewald, or PME.</span>
+<span class="sd">        nonbondedCutoff : distance=1*nanometer</span>
+<span class="sd">            The cutoff distance to use for nonbonded interactions</span>
+<span class="sd">        constraints : object=None</span>
+<span class="sd">            Specifies which bonds and angles should be implemented with constraints.</span>
+<span class="sd">            Allowed values are None, HBonds, AllBonds, or HAngles.</span>
+<span class="sd">        rigidWater : boolean=True</span>
+<span class="sd">            If true, water molecules will be fully rigid regardless of the value</span>
+<span class="sd">            passed for the constraints argument</span>
+<span class="sd">        removeCMMotion : boolean=True</span>
+<span class="sd">            If true, a CMMotionRemover will be added to the System</span>
+<span class="sd">        hydrogenMass : mass=None</span>
+<span class="sd">            The mass to use for hydrogen atoms bound to heavy atoms.  Any mass</span>
+<span class="sd">            added to a hydrogen is subtracted from the heavy atom to keep</span>
+<span class="sd">            their total mass the same.</span>
+<span class="sd">        args</span>
+<span class="sd">             Arbitrary additional keyword arguments may also be specified.</span>
+<span class="sd">             This allows extra parameters to be specified that are specific to</span>
+<span class="sd">             particular force fields.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        system</span>
+<span class="sd">            the newly created System</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Overwrite previous _SystemData object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">ForceField</span><span class="o">.</span><span class="n">_SystemData</span><span class="p">()</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">atoms</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">excludeAtomWith</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+        <span class="c1"># Make a list of all bonds</span>
+        <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">ForceField</span><span class="o">.</span><span class="n">_BondData</span><span class="p">(</span><span class="n">bond</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">bond</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+
+        <span class="c1"># Record which atoms are bonded to each other atom</span>
+        <span class="n">bonded_to_atom</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">)):</span>
+            <span class="n">bonded_to_atom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">set</span><span class="p">())</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">atomBonds</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">)):</span>
+            <span class="n">bond</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">bonded_to_atom</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">)</span>
+            <span class="n">bonded_to_atom</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">atomBonds</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">atomBonds</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Better way to lookup nonbonded parameters...?</span>
+        <span class="n">nonbonded_params</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">generator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGenerators</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">NonbondedGenerator</span><span class="p">):</span>
+                <span class="n">nonbonded_params</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">paramsForType</span>
+                <span class="k">break</span>
+
+        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">chains</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">atoms</span><span class="p">():</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">atomType</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">id</span>
+                    <span class="k">if</span> <span class="n">nonbonded_params</span><span class="p">:</span>
+                        <span class="n">params</span> <span class="o">=</span> <span class="n">nonbonded_params</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">atomParameters</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+
+        <span class="c1"># Create the System and add atoms</span>
+        <span class="n">sys</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">System</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">atoms</span><span class="p">():</span>
+            <span class="c1"># Look up the atom type name, returning a helpful error message if it cannot be found.</span>
+            <span class="k">if</span> <span class="n">atom</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">atomType</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not identify atom type for atom &#39;</span><span class="si">%s</span><span class="s2">&#39;.&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">))</span>
+            <span class="n">typename</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atomType</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span>
+
+            <span class="c1"># Look up the type name in the list of registered atom types, returning a helpful error message if it cannot be found.</span>
+            <span class="k">if</span> <span class="n">typename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomTypes</span><span class="p">:</span>
+                <span class="n">msg</span>  <span class="o">=</span> <span class="s2">&quot;Could not find typename &#39;</span><span class="si">%s</span><span class="s2">&#39; for atom &#39;</span><span class="si">%s</span><span class="s2">&#39; in list of known atom types.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">typename</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">))</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Known atom types are: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atomTypes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="c1"># Add the particle to the OpenMM system.</span>
+            <span class="n">mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomTypes</span><span class="p">[</span><span class="n">typename</span><span class="p">]</span><span class="o">.</span><span class="n">mass</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">addParticle</span><span class="p">(</span><span class="n">mass</span><span class="p">)</span>
+
+        <span class="c1"># Adjust hydrogen masses if requested.</span>
+        <span class="k">if</span> <span class="n">hydrogenMass</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">u</span><span class="o">.</span><span class="n">is_quantity</span><span class="p">(</span><span class="n">hydrogenMass</span><span class="p">):</span>
+                <span class="n">hydrogenMass</span> <span class="o">*=</span> <span class="n">u</span><span class="o">.</span><span class="n">dalton</span>
+            <span class="k">for</span> <span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">bonds</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">atom1</span><span class="o">.</span><span class="n">element</span> <span class="o">==</span> <span class="n">elem</span><span class="o">.</span><span class="n">hydrogen</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">atom2</span><span class="p">,</span> <span class="n">atom1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">atom2</span><span class="o">.</span><span class="n">element</span> <span class="o">==</span> <span class="n">elem</span><span class="o">.</span><span class="n">hydrogen</span> <span class="ow">and</span> <span class="n">atom1</span><span class="o">.</span><span class="n">element</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">hydrogen</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+                    <span class="n">transfer_mass</span> <span class="o">=</span> <span class="n">hydrogenMass</span> <span class="o">-</span> <span class="n">sys</span><span class="o">.</span><span class="n">getParticleMass</span><span class="p">(</span><span class="n">atom2</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">setParticleMass</span><span class="p">(</span><span class="n">atom2</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">hydrogenMass</span><span class="p">)</span>
+                    <span class="n">mass</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getParticleMass</span><span class="p">(</span><span class="n">atom1</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="n">transfer_mass</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">setParticleMass</span><span class="p">(</span><span class="n">atom1</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">mass</span><span class="p">)</span>
+
+        <span class="c1"># Set periodic boundary conditions.</span>
+        <span class="n">box_vectors</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">getPeriodicBoxVectors</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">box_vectors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">setDefaultPeriodicBoxVectors</span><span class="p">(</span><span class="n">box_vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="n">box_vectors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                             <span class="n">box_vectors</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">nonbondedMethod</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">NoCutoff</span><span class="p">,</span> <span class="n">CutoffNonPeriodic</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Requested periodic boundary conditions for a &#39;</span>
+                             <span class="s1">&#39;Topology that does not specify periodic box &#39;</span>
+                             <span class="s1">&#39;dimensions&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Make a list of all unique angles</span>
+        <span class="n">unique_angles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">bonded_to_atom</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">atom</span> <span class="o">!=</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">atom</span> <span class="o">&lt;</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">:</span>
+                        <span class="n">unique_angles</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">unique_angles</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">bonded_to_atom</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">atom</span> <span class="o">!=</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">atom</span> <span class="o">&gt;</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">:</span>
+                        <span class="n">unique_angles</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">unique_angles</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">,</span> <span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">))</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">angles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">unique_angles</span><span class="p">))</span>
+
+        <span class="c1"># Make a list of all unique proper torsions</span>
+        <span class="n">unique_propers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">bonded_to_atom</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]]:</span>
+                <span class="k">if</span> <span class="n">atom</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">angle</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">atom</span> <span class="o">&lt;</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                        <span class="n">unique_propers</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="p">,</span> <span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">unique_propers</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atom</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">bonded_to_atom</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">]]:</span>
+                <span class="k">if</span> <span class="n">atom</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">angle</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">atom</span> <span class="o">&gt;</span> <span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="n">unique_propers</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">atom</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">unique_propers</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="p">,</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">propers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">unique_propers</span><span class="p">))</span>
+
+        <span class="c1"># Make a list of all unique improper torsions</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bonded_to_atom</span><span class="p">)):</span>
+            <span class="n">bonded_to</span> <span class="o">=</span> <span class="n">bonded_to_atom</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bonded_to</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">bonded_to</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">impropers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">atom</span><span class="p">,</span> <span class="n">subset</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subset</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">subset</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+        <span class="c1"># Identify bonds that should be implemented with constraints</span>
+        <span class="k">if</span> <span class="n">constraints</span> <span class="o">==</span> <span class="n">AllBonds</span> <span class="ow">or</span> <span class="n">constraints</span> <span class="o">==</span> <span class="n">HAngles</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
+                <span class="n">bond</span><span class="o">.</span><span class="n">isConstrained</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">constraints</span> <span class="o">==</span> <span class="n">HBonds</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
+                <span class="n">atom1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">]</span>
+                <span class="n">atom2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">]</span>
+                <span class="n">bond</span><span class="o">.</span><span class="n">isConstrained</span> <span class="o">=</span> <span class="n">atom1</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">atom2</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rigidWater</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
+                <span class="n">atom1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom1</span><span class="p">]</span>
+                <span class="n">atom2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="o">.</span><span class="n">atom2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;HOH&#39;</span> <span class="ow">and</span> <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;HOH&#39;</span><span class="p">:</span>
+                    <span class="n">bond</span><span class="o">.</span><span class="n">isConstrained</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Identify angles that should be implemented with constraints</span>
+        <span class="k">if</span> <span class="n">constraints</span> <span class="o">==</span> <span class="n">HAngles</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
+                <span class="n">atom1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">atom2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">atom3</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="n">numH</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">atom1</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">):</span>
+                    <span class="n">numH</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">atom3</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">):</span>
+                    <span class="n">numH</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">isAngleConstrained</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numH</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="p">(</span><span class="n">numH</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">atom2</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">isAngleConstrained</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rigidWater</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">)):</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">atom1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">atom2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">atom3</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;HOH&#39;</span> <span class="ow">and</span> <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;HOH&#39;</span> <span class="ow">and</span> <span class="n">atom3</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;HOH&#39;</span><span class="p">:</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">isAngleConstrained</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Add virtual sites</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">virtualSites</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">excludeWith</span><span class="p">)</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">virtualSites</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">excludeAtomWith</span><span class="p">[</span><span class="n">excludeWith</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;average2&#39;</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">setVirtualSite</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">mm</span><span class="o">.</span><span class="n">TwoParticleAverageSite</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="n">site</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;average3&#39;</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">setVirtualSite</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">mm</span><span class="o">.</span><span class="n">ThreeParticleAverageSite</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="n">site</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;outOfPlane&#39;</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">setVirtualSite</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">mm</span><span class="o">.</span><span class="n">OutOfPlaneSite</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="n">site</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;localCoords&#39;</span><span class="p">:</span>
+                <span class="n">local_coord_site</span> <span class="o">=</span> <span class="n">mm</span><span class="o">.</span><span class="n">LocalCoordinatesSite</span><span class="p">(</span>
+                    <span class="n">atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">atoms</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">mm</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">originWeights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">originWeights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">originWeights</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                    <span class="n">mm</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">xWeights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">xWeights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">xWeights</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                    <span class="n">mm</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">yWeights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">yWeights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">yWeights</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                    <span class="n">mm</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">localPos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">localPos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">site</span><span class="o">.</span><span class="n">localPos</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">setVirtualSite</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">local_coord_site</span><span class="p">)</span>
+
+        <span class="c1"># Add forces to the System</span>
+        <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">:</span>
+            <span class="n">force</span><span class="o">.</span><span class="n">createForce</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nonbondedMethod</span><span class="p">,</span> <span class="n">nonbondedCutoff</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">removeCMMotion</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">addForce</span><span class="p">(</span><span class="n">mm</span><span class="o">.</span><span class="n">CMMotionRemover</span><span class="p">())</span>
+
+        <span class="c1"># Let force generators do postprocessing</span>
+        <span class="k">for</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;postprocessSystem&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">force</span><span class="p">):</span>
+                <span class="n">force</span><span class="o">.</span><span class="n">postprocessSystem</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c1"># Execute scripts found in the XML files.</span>
+        <span class="k">for</span> <span class="n">script</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scripts</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="nb">locals</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">sys</span></div>
+
+    <span class="k">def</span> <span class="nf">_write_references_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">,</span> <span class="n">references_file</span><span class="p">):</span>
+        <span class="n">atomtype_references</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">atype</span> <span class="ow">in</span> <span class="n">atom_types</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">atomtype_references</span><span class="p">[</span><span class="n">atype</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomTypeRefs</span><span class="p">[</span><span class="n">atype</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Reference not found for atom type &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span>
+                              <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">atype</span><span class="p">))</span>
+        <span class="n">unique_references</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">atomtype</span><span class="p">,</span> <span class="n">dois</span> <span class="ow">in</span> <span class="n">atomtype_references</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">doi</span> <span class="ow">in</span> <span class="n">dois</span><span class="p">:</span>
+                <span class="n">unique_references</span><span class="p">[</span><span class="n">doi</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atomtype</span><span class="p">)</span>
+        <span class="n">unique_references</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unique_references</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">references_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">doi</span><span class="p">,</span> <span class="n">atomtypes</span> <span class="ow">in</span> <span class="n">unique_references</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://dx.doi.org/&quot;</span> <span class="o">+</span> <span class="n">doi</span>
+                <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-bibtex&quot;</span><span class="p">}</span>
+                <span class="n">bibtex_ref</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">note</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;,</span><span class="se">\n\t</span><span class="s1">note = {Parameters for atom types: &#39;</span> <span class="o">+</span>
+                        <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">atomtypes</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
+                <span class="n">bibtex_ref</span> <span class="o">=</span> <span class="n">bibtex_ref</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">note</span> <span class="o">+</span> <span class="n">bibtex_ref</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bibtex_ref</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014-2018, Vanderbilt University
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

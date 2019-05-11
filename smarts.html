@@ -20,11 +20,21 @@
   <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.6.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -99,7 +109,13 @@
 <li class="toctree-l1"><a class="reference internal" href="forcefields.html">Parameter definitions</a></li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="atom-typing_options.html">Atom-typing Options</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="paper_examples.html">Paper Examples</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="validation.html">Validation of force field files</a></li>
@@ -179,22 +195,22 @@ straightforward extension of this notation.</p>
 <h2>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
 <p>Consider the following example defining the OPLS-AA atomtypes for a
 methyl group carbon and its hydrogen atoms:</p>
-<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;ForceField&gt;</span>
- <span class="nt">&lt;AtomTypes&gt;</span>
-  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_135&quot;</span> <span class="na">class=</span><span class="s">&quot;CT&quot;</span> <span class="na">element=</span><span class="s">&quot;C&quot;</span> <span class="na">mass=</span><span class="s">&quot;12.01100&quot;</span> <span class="na">def=</span><span class="s">&quot;[C;X4](C)(H)(H)H&quot;</span> <span class="na">desc=</span><span class="s">&quot;alkane CH3&quot;</span><span class="nt">/&gt;</span>
-  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_140&quot;</span> <span class="na">class=</span><span class="s">&quot;HC&quot;</span> <span class="na">element=</span><span class="s">&quot;H&quot;</span> <span class="na">mass=</span><span class="s">&quot;1.00800&quot;</span>  <span class="na">def=</span><span class="s">&quot;H[C;X4]&quot;</span> <span class="na">desc=</span><span class="s">&quot;alkane H&quot;</span><span class="nt">/&gt;</span>
- <span class="nt">&lt;/AtomTypes&gt;</span>
-<span class="nt">&lt;/ForceField&gt;</span>
+<div class="code xml highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">ForceField</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="n">AtomTypes</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_135&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;CT&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;C&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;12.01100&quot;</span> <span class="n">def</span><span class="o">=</span><span class="s2">&quot;[C;X4](C)(H)(H)H&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;alkane CH3&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_140&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;HC&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;H&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;1.00800&quot;</span>  <span class="n">def</span><span class="o">=</span><span class="s2">&quot;H[C;X4]&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;alkane H&quot;</span><span class="o">/&gt;</span>
+ <span class="o">&lt;/</span><span class="n">AtomTypes</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">ForceField</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>This <code class="docutils literal notranslate"><span class="pre">.xml</span></code> format is an extension of the <a class="reference external" href="http://docs.openmm.org/7.0.0/userguide/application.html#creating-force-fields">OpenMM force field
+<p>This <code class="docutils literal"><span class="pre">.xml</span></code> format is an extension of the <a class="reference external" href="http://docs.openmm.org/7.0.0/userguide/application.html#creating-force-fields">OpenMM force field
 format</a>
-The above example utilizes two additional <code class="docutils literal notranslate"><span class="pre">.xml</span></code> attributes supported
-by foyer: <code class="docutils literal notranslate"><span class="pre">def</span></code> and <code class="docutils literal notranslate"><span class="pre">desc</span></code>. The atomtype that we are attempting to
+The above example utilizes two additional <code class="docutils literal"><span class="pre">.xml</span></code> attributes supported
+by foyer: <code class="docutils literal"><span class="pre">def</span></code> and <code class="docutils literal"><span class="pre">desc</span></code>. The atomtype that we are attempting to
 match is always the <strong>first</strong> token in the SMARTS string, in the above
-example, <code class="docutils literal notranslate"><span class="pre">[C;X4]</span></code> and <code class="docutils literal notranslate"><span class="pre">H</span></code>. The <code class="docutils literal notranslate"><span class="pre">opls_135</span></code> (methyl group carbon) is
+example, <code class="docutils literal"><span class="pre">[C;X4]</span></code> and <code class="docutils literal"><span class="pre">H</span></code>. The <code class="docutils literal"><span class="pre">opls_135</span></code> (methyl group carbon) is
 defined by a SMARTS string indicated a carbon with 4 bonds, a carbon
-neighbor and 3 hydrogen neighbors. The <code class="docutils literal notranslate"><span class="pre">opls_140</span></code> (alkane hydrogen) is
+neighbor and 3 hydrogen neighbors. The <code class="docutils literal"><span class="pre">opls_140</span></code> (alkane hydrogen) is
 defined simply as a hydrogen atom bonded to a carbon with 4 bonds.</p>
 </div>
 <div class="section" id="overriding-atomtypes">
@@ -211,25 +227,25 @@ whitelist (rules that apply) and a blacklist (rules that have been
 superceded by another rule). The set difference between the white- and
 blacklists yields the correct atomtype if the force field is implemented
 correctly.</p>
-<p>We can add a rule to a blacklist using the <code class="docutils literal notranslate"><span class="pre">overrides</span></code> attribute in
-the <code class="docutils literal notranslate"><span class="pre">.xml</span></code> file. To illustrate an example where overriding can be used
+<p>We can add a rule to a blacklist using the <code class="docutils literal"><span class="pre">overrides</span></code> attribute in
+the <code class="docutils literal"><span class="pre">.xml</span></code> file. To illustrate an example where overriding can be used
 consider the following types describing alkenes and benzene:</p>
-<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;ForceField&gt;</span>
- <span class="nt">&lt;AtomTypes&gt;</span>
-  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_141&quot;</span> <span class="na">class=</span><span class="s">&quot;CM&quot;</span> <span class="na">element=</span><span class="s">&quot;C&quot;</span> <span class="na">mass=</span><span class="s">&quot;12.01100&quot;</span> <span class="na">def=</span><span class="s">&quot;[C;X3](C)(C)C&quot;</span> <span class="na">desc=</span><span class="s">&quot;alkene C (R2-C=)&quot;</span><span class="nt">/&gt;</span>
-  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_142&quot;</span> <span class="na">class=</span><span class="s">&quot;CM&quot;</span> <span class="na">element=</span><span class="s">&quot;C&quot;</span> <span class="na">mass=</span><span class="s">&quot;12.01100&quot;</span> <span class="na">def=</span><span class="s">&quot;[C;X3](C)(C)H&quot;</span> <span class="na">desc=</span><span class="s">&quot;alkene C (RH-C=)&quot;</span><span class="nt">/&gt;</span>
-  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_144&quot;</span> <span class="na">class=</span><span class="s">&quot;HC&quot;</span> <span class="na">element=</span><span class="s">&quot;H&quot;</span> <span class="na">mass=</span><span class="s">&quot;1.00800&quot;</span>  <span class="na">def=</span><span class="s">&quot;[H][C;X3]&quot;</span> <span class="na">desc=</span><span class="s">&quot;alkene H&quot;</span><span class="nt">/&gt;</span>
-  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_145&quot;</span> <span class="na">class=</span><span class="s">&quot;CA&quot;</span> <span class="na">element=</span><span class="s">&quot;C&quot;</span> <span class="na">mass=</span><span class="s">&quot;12.01100&quot;</span> <span class="na">def=</span><span class="s">&quot;[C;X3;r6]1[C;X3;r6][C;X3;r6][C;X3;r6][C;X3;r6][C;X3;r6]1&quot;</span> <span class="na">overrides=</span><span class="s">&quot;opls_141,opls_142&quot;</span><span class="nt">/&gt;</span>
-  <span class="nt">&lt;Type</span> <span class="na">name=</span><span class="s">&quot;opls_146&quot;</span> <span class="na">class=</span><span class="s">&quot;HA&quot;</span> <span class="na">element=</span><span class="s">&quot;H&quot;</span> <span class="na">mass=</span><span class="s">&quot;1.00800&quot;</span>  <span class="na">def=</span><span class="s">&quot;[H][C;%opls_145]&quot;</span> <span class="na">overrides=</span><span class="s">&quot;opls_144&quot;</span> <span class="na">desc=</span><span class="s">&quot;benzene H&quot;</span><span class="nt">/&gt;</span>
- <span class="nt">&lt;/AtomTypes&gt;</span>
-<span class="nt">&lt;/ForceField&gt;</span>
+<div class="code xml highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">ForceField</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="n">AtomTypes</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_141&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;CM&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;C&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;12.01100&quot;</span> <span class="n">def</span><span class="o">=</span><span class="s2">&quot;[C;X3](C)(C)C&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;alkene C (R2-C=)&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_142&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;CM&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;C&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;12.01100&quot;</span> <span class="n">def</span><span class="o">=</span><span class="s2">&quot;[C;X3](C)(C)H&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;alkene C (RH-C=)&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_144&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;HC&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;H&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;1.00800&quot;</span>  <span class="n">def</span><span class="o">=</span><span class="s2">&quot;[H][C;X3]&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;alkene H&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_145&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;CA&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;C&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;12.01100&quot;</span> <span class="n">def</span><span class="o">=</span><span class="s2">&quot;[C;X3;r6]1[C;X3;r6][C;X3;r6][C;X3;r6][C;X3;r6][C;X3;r6]1&quot;</span> <span class="n">overrides</span><span class="o">=</span><span class="s2">&quot;opls_141,opls_142&quot;</span><span class="o">/&gt;</span>
+  <span class="o">&lt;</span><span class="n">Type</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opls_146&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;HA&quot;</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;H&quot;</span> <span class="n">mass</span><span class="o">=</span><span class="s2">&quot;1.00800&quot;</span>  <span class="n">def</span><span class="o">=</span><span class="s2">&quot;[H][C;</span><span class="si">%o</span><span class="s2">pls_145]&quot;</span> <span class="n">overrides</span><span class="o">=</span><span class="s2">&quot;opls_144&quot;</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;benzene H&quot;</span><span class="o">/&gt;</span>
+ <span class="o">&lt;/</span><span class="n">AtomTypes</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">ForceField</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>If we’re atomtyping a benzene molecule, the carbon atoms will match the
-SMARTS patterns for both <code class="docutils literal notranslate"><span class="pre">opls_142</span></code> and <code class="docutils literal notranslate"><span class="pre">opls_145</span></code>. Without the
-<code class="docutils literal notranslate"><span class="pre">overrides</span></code> attribute, foyer will notify you that multiple atomtypes
-were found for each carbon. Providing the <code class="docutils literal notranslate"><span class="pre">overrides</span></code> indicates that
-if the <code class="docutils literal notranslate"><span class="pre">opls_145</span></code> pattern matches, it should supercede the specified
+SMARTS patterns for both <code class="docutils literal"><span class="pre">opls_142</span></code> and <code class="docutils literal"><span class="pre">opls_145</span></code>. Without the
+<code class="docutils literal"><span class="pre">overrides</span></code> attribute, foyer will notify you that multiple atomtypes
+were found for each carbon. Providing the <code class="docutils literal"><span class="pre">overrides</span></code> indicates that
+if the <code class="docutils literal"><span class="pre">opls_145</span></code> pattern matches, it should supercede the specified
 rules.</p>
 </div>
 <div class="section" id="current-grammar-supported">

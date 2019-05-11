@@ -20,11 +20,21 @@
   <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.6.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,7 +45,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Usage Examples" href="usage_examples.html" /> 
+    <link rel="prev" title="Paper Examples" href="paper_examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,7 +103,13 @@
 <li class="toctree-l1"><a class="reference internal" href="forcefields.html">Parameter definitions</a></li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="atom-typing_options.html">Atom-typing Options</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="paper_examples.html">Paper Examples</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Validation of force field files</a><ul>
@@ -181,10 +197,10 @@ example of the force field file that created the problem.</p>
 <p>As a first line of defense, any force field files loaded by foyer is
 validated by this <a class="reference external" href="../foyer/forcefields/ff.xsd">XML schema
 definition</a>. Here we enforce which
-elements (e.g. <code class="docutils literal notranslate"><span class="pre">HarmonicBondForce</span></code>) are valid and how their attributes
+elements (e.g. <code class="docutils literal"><span class="pre">HarmonicBondForce</span></code>) are valid and how their attributes
 should be formatted. Additionally, the schema ensures that atomtypes are
 not 1) defined more than once and that 2) atomtypes referenced in other
-sections are actually defined in the <code class="docutils literal notranslate"><span class="pre">&lt;AtomTypes&gt;</span></code> element.</p>
+sections are actually defined in the <code class="docutils literal"><span class="pre">&lt;AtomTypes&gt;</span></code> element.</p>
 </div>
 <div class="section" id="smarts-validation">
 <h2>SMARTS validation<a class="headerlink" href="#smarts-validation" title="Permalink to this headline">¶</a></h2>
@@ -195,8 +211,8 @@ string. Wherever possible, we attempt to provide helpful hints and we
 welcome any contributions that help improve the clarity of our error
 messages.</p>
 <p>Additionally, we ensure that any atomtypes referenced using the
-<code class="docutils literal notranslate"><span class="pre">%type</span></code> or <code class="docutils literal notranslate"><span class="pre">overrides</span></code> <a class="reference external" href="smarts.html">syntax</a> are actually defined
-in the <code class="docutils literal notranslate"><span class="pre">&lt;AtomTypes&gt;</span></code> element.</p>
+<code class="docutils literal"><span class="pre">%type</span></code> or <code class="docutils literal"><span class="pre">overrides</span></code> <a class="reference external" href="smarts.html">syntax</a> are actually defined
+in the <code class="docutils literal"><span class="pre">&lt;AtomTypes&gt;</span></code> element.</p>
 </div>
 </div>
 
@@ -209,7 +225,7 @@ in the <code class="docutils literal notranslate"><span class="pre">&lt;AtomType
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="usage_examples.html" class="btn btn-neutral float-left" title="Usage Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="paper_examples.html" class="btn btn-neutral float-left" title="Paper Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -20,11 +20,21 @@
   <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.6.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
         <script type="text/javascript" src="_static/jquery.js"></script>
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,8 +45,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Validation of force field files" href="validation.html" />
-    <link rel="prev" title="Parameter definitions" href="forcefields.html" /> 
+    <link rel="next" title="Paper Examples" href="paper_examples.html" />
+    <link rel="prev" title="Atom-typing Options" href="atom-typing_options.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,6 +103,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="forcefields.html">Parameter definitions</a></li>
 </ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="atom-typing_options.html">Atom-typing Options</a></li>
+</ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#creating-a-box-of-ethane">Creating a box of ethane</a></li>
@@ -100,6 +113,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#combining-force-fields">Combining force fields</a></li>
 </ul>
 </li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="paper_examples.html">Paper Examples</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="validation.html">Validation of force field files</a></li>
@@ -177,8 +193,8 @@ atom-type separate portions of a molecular system.</p>
 <p>Here we use mBuild to construct a box filled with ethane molecules and
 use Foyer to atom-type the system, applying the OPLS force field, and
 save to run-able GROMACS files.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mbuild</span> <span class="kn">as</span> <span class="nn">mb</span>
-<span class="kn">from</span> <span class="nn">mbuild.examples</span> <span class="kn">import</span> <span class="n">Ethane</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mbuild</span> <span class="k">as</span> <span class="nn">mb</span>
+<span class="kn">from</span> <span class="nn">mbuild.examples</span> <span class="k">import</span> <span class="n">Ethane</span>
 
 <span class="n">ethane_box</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">fill_box</span><span class="p">(</span><span class="n">compound</span><span class="o">=</span><span class="n">Ethane</span><span class="p">(),</span> <span class="n">n_compounds</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
 <span class="n">ethane_box</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;ethane-box.gro&#39;</span><span class="p">)</span>
@@ -194,7 +210,7 @@ molecules. However, now we will model ethane using a united-atom
 description and apply the TraPPE force field during atom-typing. Note
 how particle names are prefixed with an underscore so that Foyer knows
 these particles are non-atomistic.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mbuild</span> <span class="kn">as</span> <span class="nn">mb</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mbuild</span> <span class="k">as</span> <span class="nn">mb</span>
 
 <span class="n">ethane_UA</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">Compound</span><span class="p">()</span>
 <span class="n">ch3_1</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">Particle</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;_CH3&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -220,12 +236,12 @@ bulk united atom ethane above a silica surface and apply the OPLS force
 field to the surface and the TraPPE force field to the ethane. The two
 atomtyped Parmed structures are then combined using a simple ‘+’
 operator and can be saved to Gromacs files.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">foyer</span> <span class="kn">import</span> <span class="n">Forcefield</span>
-<span class="kn">from</span> <span class="nn">foyer.tests.utils</span> <span class="kn">import</span> <span class="n">get_fn</span>
-<span class="kn">import</span> <span class="nn">mbuild</span> <span class="kn">as</span> <span class="nn">mb</span>
-<span class="kn">from</span> <span class="nn">mbuild.examples</span> <span class="kn">import</span> <span class="n">Ethane</span>
-<span class="kn">from</span> <span class="nn">mbuild.lib.atoms</span> <span class="kn">import</span> <span class="n">H</span>
-<span class="kn">from</span> <span class="nn">mbuild.lib.bulk_materials</span> <span class="kn">import</span> <span class="n">AmorphousSilica</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">foyer</span> <span class="k">import</span> <span class="n">Forcefield</span>
+<span class="kn">from</span> <span class="nn">foyer.tests.utils</span> <span class="k">import</span> <span class="n">get_fn</span>
+<span class="kn">import</span> <span class="nn">mbuild</span> <span class="k">as</span> <span class="nn">mb</span>
+<span class="kn">from</span> <span class="nn">mbuild.examples</span> <span class="k">import</span> <span class="n">Ethane</span>
+<span class="kn">from</span> <span class="nn">mbuild.lib.atoms</span> <span class="k">import</span> <span class="n">H</span>
+<span class="kn">from</span> <span class="nn">mbuild.lib.bulk_materials</span> <span class="k">import</span> <span class="n">AmorphousSilica</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">SilicaInterface</span><span class="p">(</span><span class="n">bulk_silica</span><span class="o">=</span><span class="n">AmorphousSilica</span><span class="p">())</span>
 <span class="n">interface</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">Monolayer</span><span class="p">(</span><span class="n">surface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="n">H</span><span class="p">(),</span> <span class="n">guest_port_name</span><span class="o">=</span><span class="s1">&#39;up&#39;</span><span class="p">)</span>
@@ -257,10 +273,10 @@ operator and can be saved to Gromacs files.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="validation.html" class="btn btn-neutral float-right" title="Validation of force field files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="paper_examples.html" class="btn btn-neutral float-right" title="Paper Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="forcefields.html" class="btn btn-neutral float-left" title="Parameter definitions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="atom-typing_options.html" class="btn btn-neutral float-left" title="Atom-typing Options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

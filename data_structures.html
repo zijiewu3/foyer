@@ -1,0 +1,600 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Structure &mdash; foyer 0.6.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.6.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> foyer
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="smarts.html">SMARTS-based atomtyping</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="forcefields.html">Parameter definitions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="atom-typing_options.html">Atom-typing Options</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="paper_examples.html">Paper Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation of force field files</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">foyer</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Data Structure</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/data_structures.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-structure">
+<h1>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="forcefield">
+<h2>Forcefield<a class="headerlink" href="#forcefield" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="foyer.forcefield.Forcefield">
+<em class="property">class </em><code class="descclassname">foyer.forcefield.</code><code class="descname">Forcefield</code><span class="sig-paren">(</span><em>forcefield_files=None</em>, <em>name=None</em>, <em>validation=True</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/foyer/forcefield.html#Forcefield"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#foyer.forcefield.Forcefield" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specialization of OpenMM’s Forcefield allowing SMARTS based atomtyping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>forcefield_files</strong> : list of str, optional, default=None</p>
+<blockquote>
+<div><p>List of forcefield files to load.</p>
+</div></blockquote>
+<p><strong>name</strong> : str, optional, default=None</p>
+<blockquote class="last">
+<div><p>Name of a forcefield to load that is packaged within foyer.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.apply">
+<code class="descname">apply</code><span class="sig-paren">(</span><em>topology</em>, <em>references_file=None</em>, <em>use_residue_map=True</em>, <em>assert_bond_params=True</em>, <em>assert_angle_params=True</em>, <em>assert_dihedral_params=True</em>, <em>assert_improper_params=False</em>, <em>verbose=False</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/foyer/forcefield.html#Forcefield.apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#foyer.forcefield.Forcefield.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the force field to a molecular structure</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>topology</strong> : openmm.app.Topology or parmed.Structure or mbuild.Compound</p>
+<blockquote>
+<div><p>Molecular structure to apply the force field to</p>
+</div></blockquote>
+<p><strong>references_file</strong> : str, optional, default=None</p>
+<blockquote>
+<div><p>Name of file where force field references will be written (in Bibtex
+format)</p>
+</div></blockquote>
+<p><strong>use_residue_map</strong> : boolean, optional, default=True</p>
+<blockquote>
+<div><p>Store atomtyped topologies of residues to a dictionary that maps
+them to residue names.  Each topology, including atomtypes, will be
+copied to other residues with the same name. This avoids repeatedly
+calling the subgraph isomorphism on idential residues and should
+result in better performance for systems with many identical
+residues, i.e. a box of water. Note that for this to be applied to
+independent molecules, they must each be saved as different
+residues in the topology.</p>
+</div></blockquote>
+<p><strong>assert_bond_params</strong> : bool, optional, default=True</p>
+<blockquote>
+<div><p>If True, Foyer will exit if parameters are not found for all system
+bonds.</p>
+</div></blockquote>
+<p><strong>assert_angle_params</strong> : bool, optional, default=True</p>
+<blockquote>
+<div><p>If True, Foyer will exit if parameters are not found for all system
+angles.</p>
+</div></blockquote>
+<p><strong>assert_dihedral_params</strong> : bool, optional, default=True</p>
+<blockquote>
+<div><p>If True, Foyer will exit if parameters are not found for all system
+proper dihedrals.</p>
+</div></blockquote>
+<p><strong>assert_improper_params</strong> : bool, optional, default=False</p>
+<blockquote>
+<div><p>If True, Foyer will exit if parameters are not found for all system
+improper dihedrals.</p>
+</div></blockquote>
+<p><strong>verbose</strong> : bool, optional, default=False</p>
+<blockquote class="last">
+<div><p>If True, Foyer will print debug-level information about notable or
+potentially problematic details it encounters.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.createSystem">
+<code class="descname">createSystem</code><span class="sig-paren">(</span><em>topology</em>, <em>nonbondedMethod=NoCutoff</em>, <em>nonbondedCutoff=Quantity(value=1.0</em>, <em>unit=nanometer)</em>, <em>constraints=None</em>, <em>rigidWater=True</em>, <em>removeCMMotion=True</em>, <em>hydrogenMass=None</em>, <em>**args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/foyer/forcefield.html#Forcefield.createSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#foyer.forcefield.Forcefield.createSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an OpenMM System representing a Topology with this force field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>topology</strong> : Topology</p>
+<blockquote>
+<div><p>The Topology for which to create a System</p>
+</div></blockquote>
+<p><strong>nonbondedMethod</strong> : object=NoCutoff</p>
+<blockquote>
+<div><p>The method to use for nonbonded interactions.  Allowed values are
+NoCutoff, CutoffNonPeriodic, CutoffPeriodic, Ewald, or PME.</p>
+</div></blockquote>
+<p><strong>nonbondedCutoff</strong> : distance=1*nanometer</p>
+<blockquote>
+<div><p>The cutoff distance to use for nonbonded interactions</p>
+</div></blockquote>
+<p><strong>constraints</strong> : object=None</p>
+<blockquote>
+<div><p>Specifies which bonds and angles should be implemented with constraints.
+Allowed values are None, HBonds, AllBonds, or HAngles.</p>
+</div></blockquote>
+<p><strong>rigidWater</strong> : boolean=True</p>
+<blockquote>
+<div><p>If true, water molecules will be fully rigid regardless of the value
+passed for the constraints argument</p>
+</div></blockquote>
+<p><strong>removeCMMotion</strong> : boolean=True</p>
+<blockquote>
+<div><p>If true, a CMMotionRemover will be added to the System</p>
+</div></blockquote>
+<p><strong>hydrogenMass</strong> : mass=None</p>
+<blockquote>
+<div><p>The mass to use for hydrogen atoms bound to heavy atoms.  Any mass
+added to a hydrogen is subtracted from the heavy atom to keep
+their total mass the same.</p>
+</div></blockquote>
+<p><strong>args</strong></p>
+<blockquote>
+<div><p>Arbitrary additional keyword arguments may also be specified.
+This allows extra parameters to be specified that are specific to
+particular force fields.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">system</p>
+<blockquote class="last">
+<div><p>the newly created System</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.generateTemplatesForUnmatchedResidues">
+<code class="descname">generateTemplatesForUnmatchedResidues</code><span class="sig-paren">(</span><em>topology</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.generateTemplatesForUnmatchedResidues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate forcefield residue templates for residues in specified topology for which no forcefield templates are available.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">This method is experimental, and its API is subject to change.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>topology</strong> : Topology</p>
+<blockquote>
+<div><p>The Topology whose residues are to be checked against the forcefield residue templates.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>templates</strong> : list of _TemplateData</p>
+<blockquote>
+<div><p>List of forcefield residue templates corresponding to residues in <cite>topology</cite> for which no forcefield templates are currently available.
+Atom types will be set to <cite>None</cite>, but template name, atom names, elements, and connectivity will be taken from corresponding Residue objects.</p>
+</div></blockquote>
+<p><strong>residues</strong> : list of Residue</p>
+<blockquote class="last">
+<div><p>List of Residue objects that were used to generate the templates.
+<cite>residues[index]</cite> is the Residue that was used to generate the template <cite>templates[index]</cite></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.getGenerators">
+<code class="descname">getGenerators</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.getGenerators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of all registered generators.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.getMatchingTemplates">
+<code class="descname">getMatchingTemplates</code><span class="sig-paren">(</span><em>topology</em>, <em>ignoreExternalBonds=False</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.getMatchingTemplates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of forcefield residue templates matching residues in the specified topology.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">This method is experimental, and its API is subject to change.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>topology</strong> : Topology</p>
+<blockquote>
+<div><p>The Topology whose residues are to be checked against the forcefield residue templates.</p>
+</div></blockquote>
+<p><strong>ignoreExternalBonds</strong> : bool=False</p>
+<blockquote>
+<div><p>If true, ignore external bonds when matching residues to templates.</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>——-</strong></p>
+<p><strong>templates</strong> : list of _TemplateData</p>
+<blockquote>
+<div><p>List of forcefield residue templates corresponding to residues in the topology.
+templates[index] is template corresponding to residue <cite>index</cite> in topology.residues()</p>
+</div></blockquote>
+<p class="last"><strong>This method may be of use in debugging issues related to parameter assignment.</strong></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.getUnmatchedResidues">
+<code class="descname">getUnmatchedResidues</code><span class="sig-paren">(</span><em>topology</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.getUnmatchedResidues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of Residue objects from specified topology for which no forcefield templates are available.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">This method is experimental, and its API is subject to change.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>topology</strong> : Topology</p>
+<blockquote>
+<div><p>The Topology whose residues are to be checked against the forcefield residue templates.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>unmatched_residues</strong> : list of Residue</p>
+<blockquote>
+<div><p>List of Residue objects from <cite>topology</cite> for which no forcefield residue templates are available.
+Note that multiple instances of the same residue appearing at different points in the topology may be returned.</p>
+</div></blockquote>
+<p class="last">This method may be of use in generating missing residue templates or diagnosing parameterization failures.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.loadFile">
+<code class="descname">loadFile</code><span class="sig-paren">(</span><em>files</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.loadFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an XML file and add the definitions from it to this ForceField.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>files</strong> : string or file or tuple</p>
+<blockquote class="last">
+<div><p>An XML file or tuple of XML files containing force field definitions.
+Each entry may be either an absolute file path, a path relative to the current working
+directory, a path relative to this module’s data subdirectory (for
+built in force fields), or an open file-like object with a read()
+method from which the forcefield XML data can be loaded.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.registerAtomType">
+<code class="descname">registerAtomType</code><span class="sig-paren">(</span><em>parameters</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/foyer/forcefield.html#Forcefield.registerAtomType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#foyer.forcefield.Forcefield.registerAtomType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new atom type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.registerGenerator">
+<code class="descname">registerGenerator</code><span class="sig-paren">(</span><em>generator</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.registerGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new generator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.registerPatch">
+<code class="descname">registerPatch</code><span class="sig-paren">(</span><em>patch</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.registerPatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new patch that can be applied to templates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.registerResidueTemplate">
+<code class="descname">registerResidueTemplate</code><span class="sig-paren">(</span><em>template</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.registerResidueTemplate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new residue template.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.registerScript">
+<code class="descname">registerScript</code><span class="sig-paren">(</span><em>script</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.registerScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new script to be executed after building the System.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.registerTemplateGenerator">
+<code class="descname">registerTemplateGenerator</code><span class="sig-paren">(</span><em>generator</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.registerTemplateGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a residue template generator that can be used to parameterize residues that do not match existing forcefield templates.</p>
+<p>This functionality can be used to add handlers to parameterize small molecules or unnatural/modified residues.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">This method is experimental, and its API is subject to change.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>forcefield</strong> : simtk.openmm.app.ForceField</p>
+<blockquote>
+<div><blockquote>
+<div><p>The ForceField object to which residue templates and/or parameters are to be added.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>residue <span class="classifier-delimiter">:</span> <span class="classifier">simtk.openmm.app.Topology.Residue</span></dt>
+<dd><p class="first last">The residue topology for which a template is to be generated.</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>success</strong> : bool</p>
+<blockquote class="last">
+<div><blockquote>
+<div><p>If the generator is able to successfully parameterize the residue, <cite>True</cite> is returned.
+If the generator cannot parameterize the residue, it should return <cite>False</cite> and not modify <cite>forcefield</cite>.</p>
+</div></blockquote>
+<p>The generator should either register a residue template directly with <cite>forcefield.registerResidueTemplate(template)</cite>
+or it should call <cite>forcefield.loadFile(file)</cite> to load residue definitions from an ffxml file.</p>
+<p>It can also use the <cite>ForceField</cite> programmatic API to add additional atom types (via <cite>forcefield.registerAtomType(parameters)</cite>)
+or additional parameters.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.registerTemplatePatch">
+<code class="descname">registerTemplatePatch</code><span class="sig-paren">(</span><em>residue</em>, <em>patch</em>, <em>patchResidueIndex</em><span class="sig-paren">)</span><a class="headerlink" href="#foyer.forcefield.Forcefield.registerTemplatePatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register that a particular patch can be used with a particular residue.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="foyer.forcefield.Forcefield.run_atomtyping">
+<code class="descname">run_atomtyping</code><span class="sig-paren">(</span><em>topology</em>, <em>use_residue_map=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/foyer/forcefield.html#Forcefield.run_atomtyping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#foyer.forcefield.Forcefield.run_atomtyping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Atomtype the topology</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>topology</strong> : openmm.app.Topology</p>
+<blockquote>
+<div><p>Molecular structure to find atom types of</p>
+</div></blockquote>
+<p><strong>use_residue_map</strong> : boolean, optional, default=True</p>
+<blockquote class="last">
+<div><p>Store atomtyped topologies of residues to a dictionary that maps
+them to residue names.  Each topology, including atomtypes, will be
+copied to other residues with the same name. This avoids repeatedly
+calling the subgraph isomorphism on idential residues and should
+result in better performance for systems with many identical
+residues, i.e. a box of water. Note that for this to be applied to
+independent molecules, they must each be saved as different
+residues in the topology.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014-2018, Vanderbilt University
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

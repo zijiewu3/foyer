@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Paper Examples &mdash; foyer 0.6.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.6.1',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Validation of force field files" href="validation.html" />
+    <link rel="prev" title="Usage Examples" href="usage_examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> foyer
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="smarts.html">SMARTS-based atomtyping</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="forcefields.html">Parameter definitions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="atom-typing_options.html">Atom-typing Options</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Paper Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-1">Example 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-2">Example 2</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation of force field files</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">foyer</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Paper Examples</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/paper_examples.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="paper-examples">
+<h1>Paper Examples<a class="headerlink" href="#paper-examples" title="Permalink to this headline">¶</a></h1>
+<p>Contained below are the toy examples from the <em>Usage Examples</em> section of the <a class="reference external" href="https://arxiv.org/pdf/1812.06779.pdf">foyer paper</a>. The source code selections are listed below on this page, there are <a class="reference external" href="https://github.com/mosdef-hub/foyer/tree/master/docs/examples">Jupyter
+Notebooks</a>
+where you can try these examples yourself. Note that these examples are
+meant to showcase the abilities of <code class="docutils literal"><span class="pre">foyer</span></code> through simple examples. If
+the user would like to examine more in-depth examples using <code class="docutils literal"><span class="pre">foyer</span></code>
+with <code class="docutils literal"><span class="pre">mBuild</span></code>, please refer to the <a class="reference external" href="https://github.com/mosdef-hub/mosdef_tutorials">tutorial
+repository</a>.</p>
+<p>Below is <em>Listing 6</em> from the paper, a python script to fill a <span class="math">\(2x2x2 nm\)</span>
+box with 100 ethane molecules. The system is then atomtyped using the
+OPLS-AA forcefield. There are two approaches to the same problem
+detailed below in this listing, the first approach uses the
+<code class="docutils literal"><span class="pre">forcefield_files</span></code> function argument from
+<a class="reference external" href="https://github.com/mosdef-hub/mbuild">mBuild</a> to atomptype the
+system (using foyer under the hood). While the second approach creates a
+<code class="docutils literal"><span class="pre">foyer</span></code> <code class="docutils literal"><span class="pre">Forcefield</span></code> object, which then calls its <code class="docutils literal"><span class="pre">apply</span></code>
+function, operating on the <code class="docutils literal"><span class="pre">mBuild</span></code> <code class="docutils literal"><span class="pre">Compound</span></code> to return the
+properly atomtyped structure. Note that in all instances when using
+<code class="docutils literal"><span class="pre">foyer</span></code>, the chemical system of interest is converted into a
+<code class="docutils literal"><span class="pre">ParmEd</span></code> <code class="docutils literal"><span class="pre">Structure</span></code>. Even the <code class="docutils literal"><span class="pre">mBuild</span></code> <code class="docutils literal"><span class="pre">Compounds</span></code>, when
+calling the <code class="docutils literal"><span class="pre">save</span></code> routine, are converted into a <code class="docutils literal"><span class="pre">ParmEd</span></code>
+<code class="docutils literal"><span class="pre">Structure</span></code> before <code class="docutils literal"><span class="pre">foyer</span></code> can atomtype them. The object returned by
+<code class="docutils literal"><span class="pre">foyer</span></code> after the atomtypes have been applied are <code class="docutils literal"><span class="pre">ParmEd</span></code>
+<code class="docutils literal"><span class="pre">Structures</span></code>. This is subject to change in later iterations of
+<code class="docutils literal"><span class="pre">foyer</span></code>.</p>
+<div class="section" id="example-1">
+<h2>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h2>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mbuild</span> <span class="k">as</span> <span class="nn">mb</span>
+<span class="kn">from</span> <span class="nn">mbuild.examples</span> <span class="k">import</span> <span class="n">Ethane</span>
+<span class="kn">from</span> <span class="nn">foyer.tests.utils</span> <span class="k">import</span> <span class="n">get_fn</span>
+<span class="kn">from</span> <span class="nn">foyer</span> <span class="k">import</span> <span class="n">Forcefield</span>
+
+<span class="sd">&quot;&quot;&quot; Applying a force field while saving from mBuild &quot;&quot;&quot;</span>
+<span class="c1"># Create the chemical topology</span>
+<span class="n">ethane_fluid</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">fill_box</span><span class="p">(</span><span class="n">compound</span><span class="o">=</span><span class="n">Ethane</span><span class="p">(),</span> <span class="n">n_compounds</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="c1"># Apply and save the topology</span>
+<span class="n">ethane_fluid</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;ethane-box.top&quot;</span><span class="p">,</span> <span class="n">forcefield_files</span><span class="o">=</span><span class="n">get_fn</span><span class="p">(</span><span class="s2">&quot;oplsaa_alkane.xml&quot;</span><span class="p">))</span>
+<span class="n">ethane_fluid</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;ethane-box.gro&quot;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot; Applying a force field directly with foyer &quot;&quot;&quot;</span>
+<span class="c1"># Create the chemical topology</span>
+<span class="n">ethane_fluid</span> <span class="o">=</span> <span class="n">mb</span><span class="o">.</span><span class="n">fill_box</span><span class="p">(</span><span class="n">compound</span><span class="o">=</span><span class="n">Ethane</span><span class="p">(),</span> <span class="n">n_compounds</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="c1"># Load the forcefield</span>
+<span class="n">opls_alkane</span> <span class="o">=</span> <span class="n">Forcefield</span><span class="p">(</span><span class="n">forcefield_files</span><span class="o">=</span><span class="n">get_fn</span><span class="p">(</span><span class="s2">&quot;oplsaa_alkane.xml&quot;</span><span class="p">))</span>
+<span class="c1"># Apply the forcefield to atom-type</span>
+<span class="n">ethane_fluid</span> <span class="o">=</span> <span class="n">opls_alkane</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">ethane_fluid</span><span class="p">)</span>
+<span class="c1"># Save the atom-typed system</span>
+<span class="n">ethane_fluid</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;ethane-box.top&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ethane_fluid</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;ethane-box.gro&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="example-2">
+<h2>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h2>
+<p>The other example listing from the text showcases the ability to create
+two separate chemical topologies and applying different forcefield files
+to each. The two parameterized systems that are generated are then
+combined into a single <code class="docutils literal"><span class="pre">ParmEd</span></code> <code class="docutils literal"><span class="pre">Structure</span></code> and saved to disk.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">foyer</span> <span class="k">import</span> <span class="n">Forcefield</span>
+<span class="kn">from</span> <span class="nn">foyer.tests.utils</span> <span class="k">import</span> <span class="n">get_fn</span>
+<span class="kn">import</span> <span class="nn">mbuild</span> <span class="k">as</span> <span class="nn">mb</span>
+<span class="kn">from</span> <span class="nn">mbuild.examples</span> <span class="k">import</span> <span class="n">Ethane</span>
+<span class="kn">from</span> <span class="nn">mbuild.lib.atoms</span> <span class="k">import</span> <span class="n">H</span>
+<span class="kn">from</span> <span class="nn">mbuild.lib.bulk_materials</span> <span class="k">import</span> <span class="n">AmorphousSilica</span>
+
+<span class="c1"># Create a silica substrate, capping surface oxygens with hydrogen</span>
+<span class="n">silica</span><span class="o">=</span><span class="n">mb</span><span class="o">.</span><span class="n">recipes</span><span class="o">.</span><span class="n">SilicaInterface</span><span class="p">(</span><span class="n">bulk_silica</span><span class="o">=</span><span class="n">AmorphousSilica</span><span class="p">())</span>
+<span class="n">silica_substrate</span><span class="o">=</span><span class="n">mb</span><span class="o">.</span><span class="n">recipes</span><span class="o">.</span><span class="n">Monolayer</span><span class="p">(</span><span class="n">surface</span><span class="o">=</span><span class="n">silica</span><span class="p">,</span><span class="n">chains</span><span class="o">=</span><span class="n">H</span><span class="p">(),</span><span class="n">guest_port_name</span><span class="o">=</span><span class="s2">&quot;up&quot;</span><span class="p">)</span>
+<span class="c1"># Determine the box dimensions dictated by the silica substrate</span>
+<span class="n">box</span><span class="o">=</span><span class="n">mb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">mins</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="nb">max</span><span class="p">(</span><span class="n">silica</span><span class="o">.</span><span class="n">xyz</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])],</span><span class="n">maxs</span><span class="o">=</span><span class="n">silica</span><span class="o">.</span><span class="n">periodicity</span><span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="c1"># Fill the box with ethane</span>
+<span class="n">ethane_fluid</span><span class="o">=</span><span class="n">mb</span><span class="o">.</span><span class="n">fill_box</span><span class="p">(</span><span class="n">compound</span><span class="o">=</span><span class="n">Ethane</span><span class="p">(),</span><span class="n">n_compounds</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span><span class="n">box</span><span class="o">=</span><span class="n">box</span><span class="p">)</span>
+<span class="c1"># Load the forcefields</span>
+<span class="n">opls_silica</span><span class="o">=</span><span class="n">Forcefield</span><span class="p">(</span><span class="n">forcefield_files</span><span class="o">=</span><span class="n">get_fn</span><span class="p">(</span><span class="s2">&quot;oplsaa_with_silica.xml&quot;</span><span class="p">))</span>
+<span class="n">opls_alkane</span><span class="o">=</span><span class="n">Forcefield</span><span class="p">(</span><span class="n">forcefield_files</span><span class="o">=</span><span class="n">get_fn</span><span class="p">(</span><span class="s2">&quot;oplsaa_alkane.xml&quot;</span><span class="p">))</span>
+<span class="c1"># Apply the forcefields</span>
+<span class="n">silica_substrate</span><span class="o">=</span><span class="n">opls_silica</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">silica_substrate</span><span class="p">)</span>
+<span class="n">ethane_fluid</span><span class="o">=</span><span class="n">opls_alkane</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">ethane_fluid</span><span class="p">)</span>
+<span class="c1"># Merge the two topologies</span>
+<span class="n">system</span><span class="o">=</span><span class="n">silica_substrate</span><span class="o">+</span><span class="n">ethane_fluid</span>
+<span class="c1"># Save the atom-typed system</span>
+<span class="n">system</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;ethane-silica.top&quot;</span><span class="p">)</span>
+<span class="n">system</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;ethane-silica.gro&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="validation.html" class="btn btn-neutral float-right" title="Validation of force field files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="usage_examples.html" class="btn btn-neutral float-left" title="Usage Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014-2018, Vanderbilt University
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
