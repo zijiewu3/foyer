@@ -606,6 +606,13 @@
             <span class="n">positions</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
         <span class="n">box_vectors</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">getPeriodicBoxVectors</span><span class="p">()</span>
         <span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_atomtyping</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">use_residue_map</span><span class="o">=</span><span class="n">use_residue_map</span><span class="p">)</span>
+        <span class="c1"># Extra args to make OMM 7.3 happy</span>
+        <span class="c1"># Option 1: Add to the kwargs dictionary</span>
+        <span class="c1">#kwargs[&#39;switchDistance&#39;] = None</span>
+        <span class="c1">#system = self.createSystem(topology, *args, **kwargs)</span>
+        <span class="c1"># Option 2: Explicitly specify switchDistance </span>
+        <span class="c1">#system = self.createSystem(topology, switchDistance=None, *args, **kwargs)</span>
+        <span class="c1"># Option 3: Default kwarg in createSystem</span>
         <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSystem</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">_separate_urey_bradleys</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">topology</span><span class="p">)</span>
 
@@ -735,6 +742,7 @@
 <div class="viewcode-block" id="Forcefield.createSystem"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield.createSystem">[docs]</a>    <span class="k">def</span> <span class="nf">createSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology</span><span class="p">,</span> <span class="n">nonbondedMethod</span><span class="o">=</span><span class="n">NoCutoff</span><span class="p">,</span>
                      <span class="n">nonbondedCutoff</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">nanometer</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">rigidWater</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">removeCMMotion</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hydrogenMass</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">switchDistance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct an OpenMM System representing a Topology with this force field.</span>
 
@@ -759,6 +767,8 @@
 <span class="sd">            The mass to use for hydrogen atoms bound to heavy atoms.  Any mass</span>
 <span class="sd">            added to a hydrogen is subtracted from the heavy atom to keep</span>
 <span class="sd">            their total mass the same.</span>
+<span class="sd">        switchDistance : float=None</span>
+<span class="sd">            The distance at which the potential energy switching function is turned on for</span>
 <span class="sd">        args</span>
 <span class="sd">             Arbitrary additional keyword arguments may also be specified.</span>
 <span class="sd">             This allows extra parameters to be specified that are specific to</span>
@@ -769,7 +779,7 @@
 <span class="sd">        system</span>
 <span class="sd">            the newly created System</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;switchDistance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">switchDistance</span>
         <span class="c1"># Overwrite previous _SystemData object</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">ForceField</span><span class="o">.</span><span class="n">_SystemData</span><span class="p">()</span>
 

@@ -261,7 +261,7 @@ potentially problematic details it encounters.</p>
 
 <dl class="method">
 <dt id="foyer.forcefield.Forcefield.createSystem">
-<code class="descname">createSystem</code><span class="sig-paren">(</span><em>topology</em>, <em>nonbondedMethod=NoCutoff</em>, <em>nonbondedCutoff=Quantity(value=1.0</em>, <em>unit=nanometer)</em>, <em>constraints=None</em>, <em>rigidWater=True</em>, <em>removeCMMotion=True</em>, <em>hydrogenMass=None</em>, <em>**args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/foyer/forcefield.html#Forcefield.createSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#foyer.forcefield.Forcefield.createSystem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createSystem</code><span class="sig-paren">(</span><em>topology</em>, <em>nonbondedMethod=NoCutoff</em>, <em>nonbondedCutoff=Quantity(value=1.0</em>, <em>unit=nanometer)</em>, <em>constraints=None</em>, <em>rigidWater=True</em>, <em>removeCMMotion=True</em>, <em>hydrogenMass=None</em>, <em>switchDistance=None</em>, <em>**args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/foyer/forcefield.html#Forcefield.createSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#foyer.forcefield.Forcefield.createSystem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct an OpenMM System representing a Topology with this force field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -299,6 +299,10 @@ passed for the constraints argument</p>
 <div><p>The mass to use for hydrogen atoms bound to heavy atoms.  Any mass
 added to a hydrogen is subtracted from the heavy atom to keep
 their total mass the same.</p>
+</div></blockquote>
+<p><strong>switchDistance</strong> : float=None</p>
+<blockquote>
+<div><p>The distance at which the potential energy switching function is turned on for</p>
 </div></blockquote>
 <p><strong>args</strong></p>
 <blockquote>
