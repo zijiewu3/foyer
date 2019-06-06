@@ -179,7 +179,7 @@
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">mktemp</span><span class="p">,</span> <span class="n">mkstemp</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">NamedTemporaryFile</span>
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -253,12 +253,12 @@
                           <span class="s1">&#39;objects by precedence.&#39;</span><span class="p">)</span>
 
         <span class="c1"># write to temp file</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">temp_file_name</span> <span class="o">=</span> <span class="n">mkstemp</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_f</span><span class="p">:</span>
+        <span class="n">temp_file</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp_f</span><span class="p">:</span>
             <span class="n">temp_f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">xml_contents</span><span class="p">)</span>
 
         <span class="c1"># append temp file name to list</span>
-        <span class="n">preprocessed_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span>
+        <span class="n">preprocessed_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">preprocessed_files</span>
 
@@ -478,8 +478,11 @@
         <span class="k">if</span> <span class="n">validation</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">ff_file_name</span> <span class="ow">in</span> <span class="n">preprocessed_files</span><span class="p">:</span>
                 <span class="n">Validator</span><span class="p">(</span><span class="n">ff_file_name</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
-
-        <span class="nb">super</span><span class="p">(</span><span class="n">Forcefield</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">preprocessed_files</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">Forcefield</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">preprocessed_files</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ff_file_name</span> <span class="ow">in</span> <span class="n">preprocessed_files</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ff_file_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">smarts</span><span class="o">.</span><span class="n">SMARTS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span><span class="p">()</span>
 
