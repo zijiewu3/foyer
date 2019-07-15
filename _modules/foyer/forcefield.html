@@ -375,23 +375,15 @@
     <span class="k">return</span> <span class="kc">True</span>
 
 
-<span class="k">def</span> <span class="nf">_update_atomtypes</span><span class="p">(</span><span class="n">unatomtyped_topology</span><span class="p">,</span> <span class="n">res_name</span><span class="p">,</span> <span class="n">prototype</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Update atomtypes in residues in a topology using a prototype topology.</span>
+<span class="k">def</span> <span class="nf">_unwrap_typemap</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">residue_map</span><span class="p">):</span>
+    <span class="n">master_typemap</span> <span class="o">=</span> <span class="p">{</span><span class="n">atom</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;whitelist&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span> <span class="s1">&#39;blacklist&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span> <span class="s1">&#39;atomtype&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">atoms</span><span class="p">()}</span>
+    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">residues</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">res_name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">residue_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">res_name</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">atoms</span><span class="p">()):</span>
+                    <span class="n">master_typemap</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">index</span><span class="p">)][</span><span class="s1">&#39;atomtype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;atomtype&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">master_typemap</span>
 
-<span class="sd">    Atomtypes are updated when residues in each topology have matching names.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    unatomtyped_topology : openmm.app.Topology</span>
-<span class="sd">        Topology lacking atomtypes defined by `find_atomtypes`.</span>
-<span class="sd">    prototype : openmm.app.Topology</span>
-<span class="sd">        Prototype topology with atomtypes defined by `find_atomtypes`.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">unatomtyped_topology</span><span class="o">.</span><span class="n">residues</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">res_name</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">old_atom</span><span class="p">,</span> <span class="n">new_atom_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">atoms</span><span class="p">()],</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">prototype</span><span class="o">.</span><span class="n">atoms</span><span class="p">()]):</span>
-                <span class="n">old_atom</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">new_atom_id</span>
 
 <span class="k">def</span> <span class="nf">_separate_urey_bradleys</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">topology</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Separate urey bradley bonds from harmonic bonds in OpenMM System</span>
@@ -423,6 +415,7 @@
     <span class="n">system</span><span class="o">.</span><span class="n">addForce</span><span class="p">(</span><span class="n">harmonic_bond_force</span><span class="p">)</span>
     <span class="n">system</span><span class="o">.</span><span class="n">addForce</span><span class="p">(</span><span class="n">ub_force</span><span class="p">)</span>
 
+
 <span class="k">def</span> <span class="nf">_error_or_warn</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raise an error or warning if topology objects are not fully parameterized.</span>
 
@@ -437,6 +430,78 @@
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_check_bonds</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">assert_bond_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if any bonds lack paramters.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">bonds</span>
+                   <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="n">nmissing</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all bonds. &quot;</span>
+                   <span class="s2">&quot;Total system bonds: </span><span class="si">{}</span><span class="s2">, Parametrized bonds: </span><span class="si">{}</span><span class="s2">&quot;</span>
+                   <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="p">),</span> <span class="n">nmissing</span><span class="p">))</span>
+            <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_bond_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_check_angles</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">assert_angle_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if all angles were found and parametrized.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">)):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all angles. Total &quot;</span>
+               <span class="s2">&quot;system angles: </span><span class="si">{}</span><span class="s2">, Parameterized angles: </span><span class="si">{}</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">)))</span>
+        <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_angle_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">omm_ids</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
+            <span class="n">missing_angle</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">pmd_angle</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
+                <span class="n">pmd_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom2</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom3</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pmd_ids</span> <span class="o">==</span> <span class="n">omm_ids</span><span class="p">:</span>
+                    <span class="n">missing_angle</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">missing_angle</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Missing angle with ids </span><span class="si">{}</span><span class="s2"> and types </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">omm_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">omm_ids</span><span class="p">]))</span>
+
+
+<span class="k">def</span> <span class="nf">_check_dihedrals</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span>
+                     <span class="n">assert_dihedral_params</span><span class="p">,</span> <span class="n">assert_improper_params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if all dihedrals, including impropers, were found and parametrized.&quot;&quot;&quot;</span>
+    <span class="n">proper_dihedrals</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">dihedrals</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">omm_ids</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">:</span>
+            <span class="n">missing_dihedral</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">pmd_proper</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">:</span>
+                <span class="n">pmd_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom2</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom3</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom4</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pmd_ids</span> <span class="o">==</span> <span class="n">omm_ids</span><span class="p">:</span>
+                    <span class="n">missing_dihedral</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">missing_dihedral</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;missing improper with ids </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pmd_ids</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">propers</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">)</span> <span class="o">!=</span> \
+            <span class="nb">len</span><span class="p">(</span><span class="n">proper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all proper dihedrals. &quot;</span>
+               <span class="s2">&quot;Total system dihedrals: </span><span class="si">{}</span><span class="s2">, Parameterized dihedrals: </span><span class="si">{}</span><span class="s2">. &quot;</span>
+               <span class="s2">&quot;Note that if your system contains torsions of Ryckaert-&quot;</span>
+               <span class="s2">&quot;Bellemans functional form, all of these torsions are &quot;</span>
+               <span class="s2">&quot;processed as propers.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">),</span>
+                                              <span class="nb">len</span><span class="p">(</span><span class="n">proper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">)))</span>
+        <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_dihedral_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">improper_dihedrals</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">dihedrals</span>
+                          <span class="k">if</span> <span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">impropers</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">impropers</span><span class="p">)</span> <span class="o">!=</span> \
+            <span class="nb">len</span><span class="p">(</span><span class="n">improper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">impropers</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all impropers. Total &quot;</span>
+               <span class="s2">&quot;system impropers: </span><span class="si">{}</span><span class="s2">, Parameterized impropers: </span><span class="si">{}</span><span class="s2">. &quot;</span>
+               <span class="s2">&quot;Note that if your system contains torsions of Ryckaert-&quot;</span>
+               <span class="s2">&quot;Bellemans functional form, all of these torsions are &quot;</span>
+               <span class="s2">&quot;processed as propers&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">impropers</span><span class="p">),</span>
+                                             <span class="nb">len</span><span class="p">(</span><span class="n">improper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">impropers</span><span class="p">)))</span>
+        <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_improper_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Forcefield"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield">[docs]</a><span class="k">class</span> <span class="nc">Forcefield</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">ForceField</span><span class="p">):</span>
@@ -603,99 +668,30 @@
             <span class="k">raise</span> <span class="n">FoyerError</span><span class="p">(</span><span class="s1">&#39;Attempting to atom-type using a force field &#39;</span>
                     <span class="s1">&#39;with no atom type defitions.&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">Topology</span><span class="p">):</span>
-            <span class="n">residues</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;residues&#39;</span><span class="p">)</span>
-            <span class="n">topology</span><span class="p">,</span> <span class="n">positions</span> <span class="o">=</span> <span class="n">generate_topology</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span><span class="p">,</span> <span class="n">residues</span><span class="o">=</span><span class="n">residues</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">getNumAtoms</span><span class="p">(),</span> <span class="mi">3</span><span class="p">))</span>
-            <span class="n">positions</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-        <span class="n">box_vectors</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">getPeriodicBoxVectors</span><span class="p">()</span>
-        <span class="n">topology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_atomtyping</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">use_residue_map</span><span class="o">=</span><span class="n">use_residue_map</span><span class="p">)</span>
-        <span class="c1"># Extra args to make OMM 7.3 happy</span>
-        <span class="c1"># Option 1: Add to the kwargs dictionary</span>
-        <span class="c1">#kwargs[&#39;switchDistance&#39;] = None</span>
-        <span class="c1">#system = self.createSystem(topology, *args, **kwargs)</span>
-        <span class="c1"># Option 2: Explicitly specify switchDistance </span>
-        <span class="c1">#system = self.createSystem(topology, switchDistance=None, *args, **kwargs)</span>
-        <span class="c1"># Option 3: Default kwarg in createSystem</span>
+        <span class="n">topology</span><span class="p">,</span> <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_topology</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">typemap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_atomtyping</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">use_residue_map</span><span class="o">=</span><span class="n">use_residue_map</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_typemap</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">typemap</span><span class="p">)</span>
+
         <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSystem</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
         <span class="n">_separate_urey_bradleys</span><span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">topology</span><span class="p">)</span>
 
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">pmd</span><span class="o">.</span><span class="n">openmm</span><span class="o">.</span><span class="n">load_topology</span><span class="p">(</span><span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">)</span>
-
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Check that all topology objects (angles, dihedrals, and impropers)</span>
-<span class="sd">        have parameters assigned. OpenMM will generate an error if bond parameters</span>
-<span class="sd">        are not assigned.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SystemData</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">omm_ids</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
-                <span class="n">missing_angle</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">for</span> <span class="n">pmd_angle</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span>
-                    <span class="n">pmd_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom2</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_angle</span><span class="o">.</span><span class="n">atom3</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">pmd_ids</span> <span class="o">==</span> <span class="n">omm_ids</span><span class="p">:</span>
-                        <span class="n">missing_angle</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">if</span> <span class="n">missing_angle</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Missing angle with ids </span><span class="si">{}</span><span class="s2"> and types </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                          <span class="n">omm_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">omm_ids</span><span class="p">]))</span>
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">bonds</span><span class="p">:</span>
-            <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">bonds</span>
-                       <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
-                <span class="n">nmissing</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all bonds. &quot;</span>
-                       <span class="s2">&quot;Total system bonds: </span><span class="si">{}</span><span class="s2">, Parametrized bonds: </span><span class="si">{}</span><span class="s2">&quot;</span>
-                       <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="p">),</span> <span class="n">nmissing</span><span class="p">))</span>
-                <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_bond_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">angles</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">)):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all angles. Total &quot;</span>
-                   <span class="s2">&quot;system angles: </span><span class="si">{}</span><span class="s2">, Parameterized angles: </span><span class="si">{}</span><span class="s2">&quot;</span>
-                   <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">angles</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">angles</span><span class="p">)))</span>
-            <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_angle_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-
-        <span class="n">proper_dihedrals</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">dihedrals</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">omm_ids</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">:</span>
-                <span class="n">missing_dihedral</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">for</span> <span class="n">pmd_proper</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">:</span>
-                    <span class="n">pmd_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom2</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom3</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="n">pmd_proper</span><span class="o">.</span><span class="n">atom4</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">pmd_ids</span> <span class="o">==</span> <span class="n">omm_ids</span><span class="p">:</span>
-                        <span class="n">missing_dihedral</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">if</span> <span class="n">missing_dihedral</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;missing improper with ids </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pmd_ids</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">propers</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">)</span> <span class="o">!=</span> \
-                <span class="nb">len</span><span class="p">(</span><span class="n">proper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all proper dihedrals. &quot;</span>
-                   <span class="s2">&quot;Total system dihedrals: </span><span class="si">{}</span><span class="s2">, Parameterized dihedrals: </span><span class="si">{}</span><span class="s2">. &quot;</span>
-                   <span class="s2">&quot;Note that if your system contains torsions of Ryckaert-&quot;</span>
-                   <span class="s2">&quot;Bellemans functional form, all of these torsions are &quot;</span>
-                   <span class="s2">&quot;processed as propers.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">propers</span><span class="p">),</span>
-                   <span class="nb">len</span><span class="p">(</span><span class="n">proper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">rb_torsions</span><span class="p">)))</span>
-            <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_dihedral_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-
-        <span class="n">improper_dihedrals</span> <span class="o">=</span> <span class="p">[</span><span class="n">dihedral</span> <span class="k">for</span> <span class="n">dihedral</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">dihedrals</span>
-                              <span class="k">if</span> <span class="n">dihedral</span><span class="o">.</span><span class="n">improper</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">impropers</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">impropers</span><span class="p">)</span> <span class="o">!=</span> \
-                <span class="nb">len</span><span class="p">(</span><span class="n">improper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">impropers</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Parameters have not been assigned to all impropers. Total &quot;</span>
-                   <span class="s2">&quot;system impropers: </span><span class="si">{}</span><span class="s2">, Parameterized impropers: </span><span class="si">{}</span><span class="s2">. &quot;</span>
-                   <span class="s2">&quot;Note that if your system contains torsions of Ryckaert-&quot;</span>
-                   <span class="s2">&quot;Bellemans functional form, all of these torsions are &quot;</span>
-                   <span class="s2">&quot;processed as propers&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">impropers</span><span class="p">),</span>
-                   <span class="nb">len</span><span class="p">(</span><span class="n">improper_dihedrals</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">impropers</span><span class="p">)))</span>
-            <span class="n">_error_or_warn</span><span class="p">(</span><span class="n">assert_improper_params</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">pmd</span><span class="o">.</span><span class="n">openmm</span><span class="o">.</span><span class="n">load_topology</span><span class="p">(</span><span class="n">topology</span><span class="o">=</span><span class="n">topology</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">system</span><span class="p">)</span>
         <span class="n">structure</span><span class="o">.</span><span class="n">bonds</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">atom1</span><span class="o">.</span><span class="n">idx</span><span class="p">)</span>
         <span class="n">structure</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span>
+        <span class="n">box_vectors</span> <span class="o">=</span> <span class="n">topology</span><span class="o">.</span><span class="n">getPeriodicBoxVectors</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">box_vectors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">structure</span><span class="o">.</span><span class="n">box_vectors</span> <span class="o">=</span> <span class="n">box_vectors</span>
+
+        <span class="n">_check_bonds</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">assert_bond_params</span><span class="p">)</span>
+        <span class="n">_check_angles</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">assert_angle_params</span><span class="p">)</span>
+        <span class="n">_check_dihedrals</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span>
+                              <span class="n">assert_dihedral_params</span><span class="p">,</span> <span class="n">assert_improper_params</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">references_file</span><span class="p">:</span>
             <span class="n">atom_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_write_references_to_file</span><span class="p">(</span><span class="n">atom_types</span><span class="p">,</span> <span class="n">references_file</span><span class="p">)</span>
@@ -728,22 +724,21 @@
                 <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">residues</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">residue_map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="n">residue</span> <span class="o">=</span> <span class="n">_topology_from_residue</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-                        <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">residue</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-                        <span class="n">residue_map</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">residue</span>
+                        <span class="n">typemap</span> <span class="o">=</span> <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">residue</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                        <span class="n">residue_map</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">typemap</span>
 
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">residue_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">_update_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+                <span class="n">typemap</span> <span class="o">=</span> <span class="n">_unwrap_typemap</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">residue_map</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">typemap</span> <span class="o">=</span> <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">typemap</span> <span class="o">=</span> <span class="n">find_atomtypes</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">atoms</span><span class="p">()][</span><span class="mi">0</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not all atoms in topology have atom types&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">topology</span></div>
+        <span class="k">return</span> <span class="n">typemap</span></div>
 
 <div class="viewcode-block" id="Forcefield.createSystem"><a class="viewcode-back" href="../../data_structures.html#foyer.forcefield.Forcefield.createSystem">[docs]</a>    <span class="k">def</span> <span class="nf">createSystem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology</span><span class="p">,</span> <span class="n">nonbondedMethod</span><span class="o">=</span><span class="n">NoCutoff</span><span class="p">,</span>
                      <span class="n">nonbondedCutoff</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">u</span><span class="o">.</span><span class="n">nanometer</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -989,6 +984,22 @@
 
         <span class="k">return</span> <span class="n">sys</span></div>
 
+    <span class="k">def</span> <span class="nf">_apply_typemap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology</span><span class="p">,</span> <span class="n">typemap</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add atomtypes to the topology according to the typemap&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">topology</span><span class="o">.</span><span class="n">atoms</span><span class="p">():</span>
+            <span class="n">atom</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">typemap</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;atomtype&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topology</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">Topology</span><span class="p">):</span>
+            <span class="n">residues</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;residues&#39;</span><span class="p">)</span>
+            <span class="n">topology</span><span class="p">,</span> <span class="n">positions</span> <span class="o">=</span> <span class="n">generate_topology</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">non_element_types</span><span class="p">,</span> <span class="n">residues</span><span class="o">=</span><span class="n">residues</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">topology</span><span class="o">.</span><span class="n">getNumAtoms</span><span class="p">(),</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">positions</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">return</span> <span class="n">topology</span><span class="p">,</span> <span class="n">positions</span>
+
     <span class="k">def</span> <span class="nf">_write_references_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_types</span><span class="p">,</span> <span class="n">references_file</span><span class="p">):</span>
         <span class="n">atomtype_references</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">atype</span> <span class="ow">in</span> <span class="n">atom_types</span><span class="p">:</span>
@@ -1011,6 +1022,7 @@
                         <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">atomtypes</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span>
                 <span class="n">bibtex_ref</span> <span class="o">=</span> <span class="n">bibtex_ref</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">note</span> <span class="o">+</span> <span class="n">bibtex_ref</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bibtex_ref</span><span class="p">))</span></div>
+
 
 <span class="n">pmd</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">write_foyer</span> <span class="o">=</span> <span class="n">write_foyer</span>
 </pre></div>
