@@ -1,8 +1,7 @@
-openmm
+openmm >=7.5
 mbuild
 parmed
 networkx >=2.0
-six
 lark-parser
 requests
 lxml
@@ -10,3 +9,5 @@ pytest >=3.0
 pytest-cov
 pytest-timeout
 codecov
+requests-mock
+bump2version

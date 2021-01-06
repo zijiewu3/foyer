@@ -5,12 +5,7 @@ import os
 from tempfile import NamedTemporaryFile
 import xml.etree.ElementTree as ET
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
 from pkg_resources import resource_filename
-import requests
 import warnings
 import re
 
@@ -31,21 +26,23 @@ from foyer import smarts
 from foyer.validator import Validator
 from foyer.xml_writer import write_foyer
 from foyer.utils.io import import_, has_mbuild
+from foyer.utils.external import get_ref
 
 
 def preprocess_forcefield_files(forcefield_files=None):
+    """Pre-process foyer Forcefield XML files"""
     if forcefield_files is None:
         return None
 
     preprocessed_files = []
 
     for xml_file in forcefield_files:
-        if not hasattr(xml_file,'read'):
+        if not hasattr(xml_file, 'read'):
             f = open(xml_file)
-            _,suffix = os.path.split(xml_file)
+            _, suffix = os.path.split(xml_file)
         else:
             f = xml_file
-            suffix=""
+            suffix = ""
 
         # read and preprocess
         xml_contents = f.read()
@@ -86,8 +83,7 @@ def preprocess_forcefield_files(forcefield_files=None):
     return preprocessed_files
 
 
-def generate_topology(non_omm_topology, non_element_types=None,
-        residues=None):
+def generate_topology(non_omm_topology, non_element_types=None, residues=None):
     """Create an OpenMM Topology from another supported topology structure."""
     if non_element_types is None:
         non_element_types = set()
@@ -97,14 +93,31 @@ def generate_topology(non_omm_topology, non_element_types=None,
     elif has_mbuild:
         mb = import_('mbuild')
         if (non_omm_topology, mb.Compound):
-            pmdCompoundStructure = non_omm_topology.to_parmed(residues=residues)
-            return _topology_from_parmed(pmdCompoundStructure, non_element_types)
+            pmd_comp_struct = non_omm_topology.to_parmed(residues=residues)
+            return _topology_from_parmed(pmd_comp_struct, non_element_types)
     else:
         raise FoyerError('Unknown topology format: {}\n'
                          'Supported formats are: '
                          '"parmed.Structure", '
                          '"mbuild.Compound", '
                          '"openmm.app.Topology"'.format(non_omm_topology))
+
+
+def _structure_from_residue(residue, parent_structure):
+    """Convert a ParmEd Residue to an equivalent Structure."""
+    structure = pmd.Structure()
+    for atom in residue.atoms:
+        structure.add_atom(atom, resname=residue.name, resnum=residue.number)
+
+    for bond in parent_structure.bonds:
+        if bond.atom1 in residue.atoms and bond.atom2 in residue.atoms:
+            structure.bonds.append(bond)
+
+    idx_offset = min([a.idx for a in structure])
+    for atom in structure.atoms:
+        atom._idx -= idx_offset
+
+    return structure
 
 
 def _topology_from_parmed(structure, non_element_types):
@@ -114,7 +127,8 @@ def _topology_from_parmed(structure, non_element_types):
     for pmd_residue in structure.residues:
         chain = topology.addChain()
         omm_residue = topology.addResidue(pmd_residue.name, chain)
-        residues[pmd_residue] = omm_residue
+        # Index ParmEd residues on name & number, no other info i.e. chain
+        residues[(pmd_residue.name, pmd_residue.idx)] = omm_residue
     atoms = dict()  # pmd.Atom: omm.Atom
 
     for pmd_atom in structure.atoms:
@@ -128,7 +142,8 @@ def _topology_from_parmed(structure, non_element_types):
             else:
                 element = elem.Element.getBySymbol(pmd_atom.name)
 
-        omm_atom = topology.addAtom(name, element, residues[pmd_atom.residue])
+        omm_atom = topology.addAtom(name, element, residues[(pmd_atom.residue.name, pmd_atom.residue.idx)])
+        omm_atom.id = pmd_atom.id
         atoms[pmd_atom] = omm_atom
         omm_atom.bond_partners = []
 
@@ -182,11 +197,11 @@ def _topology_from_residue(res):
     return topology
 
 
-def _check_independent_residues(topology):
+def _check_independent_residues(structure):
     """Check to see if residues will constitute independent graphs."""
-    for res in topology.residues():
-        atoms_in_residue = set([atom for atom in res.atoms()])
-        bond_partners_in_residue = [item for sublist in [atom.bond_partners for atom in res.atoms()] for item in sublist]
+    for res in structure.residues:
+        atoms_in_residue = set([*res.atoms])
+        bond_partners_in_residue = [item for sublist in [atom.bond_partners for atom in res.atoms] for item in sublist]
         # Handle the case of a 'residue' with no neighbors
         if not bond_partners_in_residue:
             continue
@@ -195,13 +210,13 @@ def _check_independent_residues(topology):
     return True
 
 
-def _unwrap_typemap(topology, residue_map):
-    master_typemap = {atom.index: {'whitelist': set(), 'blacklist': set(), 'atomtype': None} for atom in topology.atoms()}
-    for res in topology.residues():
-        for res_name, val in residue_map.items():
-            if res.name == res_name:
-                for i, atom in enumerate(res.atoms()):
-                    master_typemap[int(atom.index)]['atomtype'] = val[i]['atomtype']
+def _unwrap_typemap(structure, residue_map):
+    master_typemap = {atom.idx: {'whitelist': set(), 'blacklist': set(), 'atomtype': None} for atom in structure.atoms}
+    for res in structure.residues:
+        for res_ref, val in residue_map.items():
+            if id(res.name) == id(res_ref):
+                for i, atom in enumerate(res.atoms):
+                    master_typemap[int(atom.idx)]['atomtype'] = val[i]['atomtype']
     return master_typemap
 
 
@@ -267,12 +282,6 @@ def _check_bonds(data, structure, assert_bond_params):
 
 def _check_angles(data, structure, verbose, assert_angle_params):
     """Check if all angles were found and parametrized."""
-    if data.angles and (len(data.angles) != len(structure.angles)):
-        msg = ("Parameters have not been assigned to all angles. Total "
-               "system angles: {}, Parameterized angles: {}"
-               "".format(len(data.angles), len(structure.angles)))
-        _error_or_warn(assert_angle_params, msg)
-
     if verbose:
         for omm_ids in data.angles:
             missing_angle = True
@@ -284,6 +293,13 @@ def _check_angles(data, structure, verbose, assert_angle_params):
                 print("Missing angle with ids {} and types {}.".format(
                     omm_ids, [structure.atoms[idx].type for idx in omm_ids]))
 
+    if data.angles and (len(data.angles) != len(structure.angles)):
+        msg = ("Parameters have not been assigned to all angles. Total "
+               "system angles: {}, Parameterized angles: {}"
+               "".format(len(data.angles), len(structure.angles)))
+        _error_or_warn(assert_angle_params, msg)
+
+
 
 def _check_dihedrals(data, structure, verbose,
                      assert_dihedral_params, assert_improper_params):
@@ -294,22 +310,38 @@ def _check_dihedrals(data, structure, verbose,
     if verbose:
         for omm_ids in data.propers:
             missing_dihedral = True
+            for pmd_proper in proper_dihedrals:
+                pmd_ids = (pmd_proper.atom1.idx, pmd_proper.atom2.idx, pmd_proper.atom3.idx, pmd_proper.atom4.idx)
+                if pmd_ids == omm_ids:
+                    missing_dihedral = False
             for pmd_proper in structure.rb_torsions:
                 pmd_ids = (pmd_proper.atom1.idx, pmd_proper.atom2.idx, pmd_proper.atom3.idx, pmd_proper.atom4.idx)
                 if pmd_ids == omm_ids:
                     missing_dihedral = False
             if missing_dihedral:
-                print('missing improper with ids {}'.format(pmd_ids))
+                print("Missing dihedral with ids {} and types {}.".format(
+                        omm_ids, [structure.atoms[idx].type for idx in omm_ids]))
 
     if data.propers and len(data.propers) != \
-            len(proper_dihedrals) + len(structure.rb_torsions):
-        msg = ("Parameters have not been assigned to all proper dihedrals. "
-               "Total system dihedrals: {}, Parameterized dihedrals: {}. "
-               "Note that if your system contains torsions of Ryckaert-"
-               "Bellemans functional form, all of these torsions are "
-               "processed as propers.".format(len(data.propers),
-                                              len(proper_dihedrals) + len(structure.rb_torsions)))
-        _error_or_warn(assert_dihedral_params, msg)
+                len(proper_dihedrals) + len(structure.rb_torsions):
+            if data.propers and len(data.propers) < \
+                    len(proper_dihedrals) + len(structure.rb_torsions):
+                msg = ("Parameters have been assigned to all proper dihedrals.  "
+                       "However, there are more parameterized dihedrals ({}) "
+                       "than total system dihedrals ({}).  "
+                       "This may be due to having multiple periodic dihedrals "
+                       "for a single system dihedral.".format(len(proper_dihedrals) +
+                                                      len(structure.rb_torsions),
+                                                      len(data.propers)))
+                warnings.warn(msg)
+            else:
+                msg = ("Parameters have not been assigned to all proper dihedrals. "
+                       "Total system dihedrals: {}, Parameterized dihedrals: {}. "
+                       "Note that if your system contains torsions of Ryckaert-"
+                       "Bellemans functional form, all of these torsions are "
+                       "processed as propers.".format(len(data.propers),
+                                                      len(proper_dihedrals) + len(structure.rb_torsions)))
+                _error_or_warn(assert_dihedral_params, msg)
 
     improper_dihedrals = [dihedral for dihedral in structure.dihedrals
                           if dihedral.improper]
@@ -345,6 +377,8 @@ class Forcefield(app.ForceField):
         self.atomTypeElements = dict()
         self._included_forcefields = dict()
         self.non_element_types = dict()
+        self._version = None
+        self._name = None
 
         all_files_to_load = []
         if forcefield_files is not None:
@@ -371,8 +405,24 @@ class Forcefield(app.ForceField):
         finally:
             for ff_file_name in preprocessed_files:
                 os.remove(ff_file_name)
+
+        if isinstance(forcefield_files, str):
+            self._version = self._parse_version_number(forcefield_files)
+            self._name = self._parse_name(forcefield_files)
+        elif isinstance(forcefield_files, list):
+            self._version = [self._parse_version_number(f) for f in forcefield_files]
+            self._name = [self._parse_name(f) for f in forcefield_files]
+
         self.parser = smarts.SMARTS(self.non_element_types)
-        self._SystemData = self._SystemData()
+        self._system_data = None
+
+    @property
+    def version(self):
+        return self._version
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def included_forcefields(self):
@@ -380,13 +430,37 @@ class Forcefield(app.ForceField):
             return self._included_forcefields
 
         ff_dir = resource_filename('foyer', 'forcefields')
-        ff_filepaths = set(glob.glob(os.path.join(ff_dir, '*.xml')))
+        ff_filepaths = set(glob.glob(os.path.join(ff_dir, 'xml/*.xml')))
 
         for ff_filepath in ff_filepaths:
             _, ff_file = os.path.split(ff_filepath)
             basename, _ = os.path.splitext(ff_file)
             self._included_forcefields[basename] = ff_filepath
         return self._included_forcefields
+
+    def _parse_version_number(self, forcefield_file):
+        with open(forcefield_file, 'r') as f:
+            tree = ET.parse(f)
+            root = tree.getroot()
+            try:
+                return root.attrib['version']
+            except KeyError:
+                warnings.warn(
+                    'No force field version number found in force field XML file.'
+                )
+                return None
+
+    def _parse_name(self, forcefield_file):
+        with open(forcefield_file, 'r') as f:
+            tree = ET.parse(f)
+            root = tree.getroot()
+            try:
+                return root.attrib['name']
+            except KeyError:
+                warnings.warn(
+                    'No force field name found in force field XML file.'
+                )
+                return None
 
     def _create_element(self, element, mass):
         if not isinstance(element, elem.Element):
@@ -436,7 +510,7 @@ class Forcefield(app.ForceField):
                             in parameters['overrides'].split(","))
             if overrides:
                 self.atomTypeOverrides[name] = overrides
-        if 'des' in parameters:
+        if 'desc' in parameters:
             self.atomTypeDesc[name] = parameters['desc']
         if 'doi' in parameters:
             dois = set(doi.strip() for doi in parameters['doi'].split(','))
@@ -446,15 +520,15 @@ class Forcefield(app.ForceField):
         if 'class' in parameters:
             self.atomTypeClasses[name] = parameters['class']
 
-    def apply(self, topology, references_file=None, use_residue_map=True,
+    def apply(self, structure, references_file=None, use_residue_map=True,
               assert_bond_params=True, assert_angle_params=True,
               assert_dihedral_params=True, assert_improper_params=False,
-              verbose=False, *args, **kwargs):
+              combining_rule='geometric', verbose=False, *args, **kwargs):
         """Apply the force field to a molecular structure
 
         Parameters
         ----------
-        topology : openmm.app.Topology or parmed.Structure or mbuild.Compound
+        structure : parmed.Structure or mbuild.Compound
             Molecular structure to apply the force field to
         references_file : str, optional, default=None
             Name of file where force field references will be written (in Bibtex
@@ -480,6 +554,9 @@ class Forcefield(app.ForceField):
         assert_improper_params : bool, optional, default=False
             If True, Foyer will exit if parameters are not found for all system
             improper dihedrals.
+        combining_rule : str, optional, default='geometric'
+            The combining rule of the system, stored as an attribute of the
+            ParmEd structure. Accepted arguments are `geometric` and `lorentz`.
         verbose : bool, optional, default=False
             If True, Foyer will print debug-level information about notable or
             potentially problematic details it encounters.
@@ -488,17 +565,77 @@ class Forcefield(app.ForceField):
             raise FoyerError('Attempting to atom-type using a force field '
                     'with no atom type defitions.')
 
-        topology, positions = self._prepare_topology(topology, **kwargs)
+        if not isinstance(structure, pmd.Structure):
+            mb = import_('mbuild')
+            if isinstance(structure, mb.Compound):
+                structure = structure.to_parmed(**kwargs)
 
-        typemap = self.run_atomtyping(topology, use_residue_map=use_residue_map)
+        typemap = self.run_atomtyping(structure, use_residue_map=use_residue_map, **kwargs)
 
-        self._apply_typemap(topology, typemap)
+        self._apply_typemap(structure, typemap)
+
+        return self.parametrize_system(structure=structure,
+            references_file=references_file, assert_bond_params=assert_bond_params,
+            assert_angle_params=assert_angle_params, assert_dihedral_params=assert_dihedral_params,
+            assert_improper_params=assert_improper_params, combining_rule=combining_rule,
+            verbose=verbose, *args, **kwargs)
+
+    def run_atomtyping(self, structure, use_residue_map=True, **kwargs):
+        """Atomtype the topology
+
+        Parameters
+        ----------
+        structure : parmed.structure.Structure
+            Molecular structure to find atom types of
+        use_residue_map : boolean, optional, default=True
+            Store atomtyped topologies of residues to a dictionary that maps
+            them to residue names.  Each topology, including atomtypes, will be
+            copied to other residues with the same name. This avoids repeatedly
+            calling the subgraph isomorphism on idential residues and should
+            result in better performance for systems with many identical
+            residues, i.e. a box of water. Note that for this to be applied to
+            independent molecules, they must each be saved as different
+            residues in the topology.
+        """
+
+        if use_residue_map:
+            independent_residues = _check_independent_residues(structure)
+
+            if independent_residues:
+                residue_map = dict()
+
+                # Need to call this only once and store results for later id() comparisons
+                for res_id, res in enumerate(structure.residues):
+                    if structure.residues[res_id].name not in residue_map.keys():
+                        tmp_res = _structure_from_residue(res, structure)
+                        typemap = find_atomtypes(tmp_res, forcefield=self)
+                        residue_map[res.name] = typemap
+
+                typemap = _unwrap_typemap(structure, residue_map)
+
+            else:
+                typemap = find_atomtypes(structure, forcefield=self)
+
+        else:
+            typemap = find_atomtypes(structure, forcefield=self)
+
+        return typemap
+
+    def parametrize_system(self, structure=None,
+                           references_file=None, assert_bond_params=True,
+                           assert_angle_params=True,
+                           assert_dihedral_params=True,
+                           assert_improper_params=False,
+                           combining_rule='geometric', verbose=False,
+                           *args, **kwargs):
+
+        topology, positions = _topology_from_parmed(structure, self.non_element_types)
 
         system = self.createSystem(topology, *args, **kwargs)
 
         _separate_urey_bradleys(system, topology)
 
-        data = self._SystemData
+        data = self._system_data
 
         structure = pmd.openmm.load_topology(topology=topology, system=system)
         structure.bonds.sort(key=lambda x: x.atom1.idx)
@@ -516,49 +653,17 @@ class Forcefield(app.ForceField):
             atom_types = set(atom.type for atom in structure.atoms)
             self._write_references_to_file(atom_types, references_file)
 
+        # TODO: Check against the name of the force field and/or store
+        # combining rule directly in XML, i.e.
+        # if self.name == 'oplsaa':
+        structure.combining_rule = combining_rule
+
+        total_charge = sum([atom.charge for atom in structure.atoms])
+        if not np.allclose(total_charge, 0):
+            warnings.warn("Parametrized structure has non-zero charge."
+                "Structure's total charge: {}".format(total_charge))
+
         return structure
-
-    def run_atomtyping(self, topology, use_residue_map=True):
-        """Atomtype the topology
-
-        Parameters
-        ----------
-        topology : openmm.app.Topology
-            Molecular structure to find atom types of
-        use_residue_map : boolean, optional, default=True
-            Store atomtyped topologies of residues to a dictionary that maps
-            them to residue names.  Each topology, including atomtypes, will be
-            copied to other residues with the same name. This avoids repeatedly
-            calling the subgraph isomorphism on idential residues and should
-            result in better performance for systems with many identical
-            residues, i.e. a box of water. Note that for this to be applied to
-            independent molecules, they must each be saved as different
-            residues in the topology.
-        """
-        if use_residue_map:
-            independent_residues = _check_independent_residues(topology)
-
-            if independent_residues:
-                residue_map = dict()
-
-                for res in topology.residues():
-                    if res.name not in residue_map.keys():
-                        residue = _topology_from_residue(res)
-                        typemap = find_atomtypes(residue, forcefield=self)
-                        residue_map[res.name] = typemap
-
-                typemap = _unwrap_typemap(topology, residue_map)
-
-            else:
-                typemap = find_atomtypes(topology, forcefield=self)
-
-        else:
-            typemap = find_atomtypes(topology, forcefield=self)
-
-        if not all([a.id for a in topology.atoms()][0]):
-            raise ValueError('Not all atoms in topology have atom types')
-
-        return typemap
 
     def createSystem(self, topology, nonbondedMethod=NoCutoff,
                      nonbondedCutoff=1.0 * u.nanometer, constraints=None,
@@ -602,28 +707,8 @@ class Forcefield(app.ForceField):
         """
         args['switchDistance'] = switchDistance
         # Overwrite previous _SystemData object
-        self._SystemData = app.ForceField._SystemData()
-
-        data = self._SystemData
-        data.atoms = list(topology.atoms())
-        for atom in data.atoms:
-            data.excludeAtomWith.append([])
-
-        # Make a list of all bonds
-        for bond in topology.bonds():
-            data.bonds.append(app.ForceField._BondData(bond[0].index, bond[1].index))
-
-        # Record which atoms are bonded to each other atom
-        bonded_to_atom = []
-        for i in range(len(data.atoms)):
-            bonded_to_atom.append(set())
-            data.atomBonds.append([])
-        for i in range(len(data.bonds)):
-            bond = data.bonds[i]
-            bonded_to_atom[bond.atom1].add(bond.atom2)
-            bonded_to_atom[bond.atom2].add(bond.atom1)
-            data.atomBonds[bond.atom1].append(i)
-            data.atomBonds[bond.atom2].append(i)
+        data = app.ForceField._SystemData(topology)
+        self._system_data = data
 
         # TODO: Better way to lookup nonbonded parameters...?
         nonbonded_params = None
@@ -685,13 +770,13 @@ class Forcefield(app.ForceField):
         # Make a list of all unique angles
         unique_angles = set()
         for bond in data.bonds:
-            for atom in bonded_to_atom[bond.atom1]:
+            for atom in data.bondedToAtom[bond.atom1]:
                 if atom != bond.atom2:
                     if atom < bond.atom2:
                         unique_angles.add((atom, bond.atom1, bond.atom2))
                     else:
                         unique_angles.add((bond.atom2, bond.atom1, atom))
-            for atom in bonded_to_atom[bond.atom2]:
+            for atom in data.bondedToAtom[bond.atom2]:
                 if atom != bond.atom1:
                     if atom > bond.atom1:
                         unique_angles.add((bond.atom1, bond.atom2, atom))
@@ -702,13 +787,13 @@ class Forcefield(app.ForceField):
         # Make a list of all unique proper torsions
         unique_propers = set()
         for angle in data.angles:
-            for atom in bonded_to_atom[angle[0]]:
+            for atom in data.bondedToAtom[angle[0]]:
                 if atom not in angle:
                     if atom < angle[2]:
                         unique_propers.add((atom, angle[0], angle[1], angle[2]))
                     else:
                         unique_propers.add((angle[2], angle[1], angle[0], atom))
-            for atom in bonded_to_atom[angle[2]]:
+            for atom in data.bondedToAtom[angle[2]]:
                 if atom not in angle:
                     if atom > angle[0]:
                         unique_propers.add((angle[0], angle[1], angle[2], atom))
@@ -717,8 +802,8 @@ class Forcefield(app.ForceField):
         data.propers = sorted(list(unique_propers))
 
         # Make a list of all unique improper torsions
-        for atom in range(len(bonded_to_atom)):
-            bonded_to = bonded_to_atom[atom]
+        for atom in range(len(data.bondedToAtom)):
+            bonded_to = data.bondedToAtom[atom]
             if len(bonded_to) > 2:
                 for subset in itertools.combinations(bonded_to, 3):
                     data.impropers.append((atom, subset[0], subset[1], subset[2]))
@@ -804,12 +889,16 @@ class Forcefield(app.ForceField):
 
         return sys
 
-    def _apply_typemap(self, topology, typemap):
+    def _apply_typemap(self, structure, typemap):
         """Add atomtypes to the topology according to the typemap"""
-        for atom in topology.atoms():
-            atom.id = typemap[atom.index]['atomtype']
+        for atom in structure.atoms:
+            atom.id = typemap[atom.idx]['atomtype']
 
-    def _prepare_topology(self, topology, **kwargs):
+        if not all([a.id for a in structure.atoms]):
+            raise ValueError('Not all atoms in topology have atom types')
+
+    def _prepare_structure(self, topology, **kwargs):
+        """Separate positions and other topological information"""
         if not isinstance(topology, app.Topology):
             residues = kwargs.get('residues')
             topology, positions = generate_topology(topology,
@@ -835,13 +924,18 @@ class Forcefield(app.ForceField):
         unique_references = collections.OrderedDict(sorted(unique_references.items()))
         with open(references_file, 'w') as f:
             for doi, atomtypes in unique_references.items():
-                url = "http://dx.doi.org/" + doi
+                url = "http://api.crossref.org/works/{}/transform/application/x-bibtex".format(doi)
                 headers = {"accept": "application/x-bibtex"}
-                bibtex_ref = requests.get(url, headers=headers).text
+                bibtex_ref = get_ref(url, headers=headers)
+                if bibtex_ref is None:
+                    warnings.warn('Could not get ref for doi'.format(doi))
+                    continue
+                else:
+                    bibtex_text = bibtex_ref.text
                 note = (',\n\tnote = {Parameters for atom types: ' +
                         ', '.join(sorted(atomtypes)) + '}')
-                bibtex_ref = bibtex_ref[:-2] + note + bibtex_ref[-2:]
-                f.write('{}\n'.format(bibtex_ref))
+                bibtex_text = bibtex_text[:-2] + note + bibtex_text[-2:]
+                f.write('{}\n'.format(bibtex_text))
 
 
 pmd.Structure.write_foyer = write_foyer
